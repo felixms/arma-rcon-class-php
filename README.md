@@ -1,5 +1,7 @@
 # Arma 3 Rcon PHP-Class
-An easy-to-use php class for sending rcon commands to Arma 3 servers.
+This class let's you easily send RCON commands to your Arma 3 server.
+
+# Installation
 
 # Examples
 
