@@ -1,6 +1,13 @@
-# Arma 3 Rcon PHP-Class
+# Arma Rcon PHP-Class
 
-This class let's you easily send RCON commands to your Arma 3 server.
+This class let's you easily send RCON commands to your Arma server. See "Games Supported" for a full list of supported Arma servers.
+
+## Games Supported
+| Game          | Support       |
+| ------------- |:-------------:|
+| Arma 3        | :white_check_mark: |
+| Arma 2 (also Dayz)      | :white_check_mark:  |
+More Arma games are being tested at the moment.
 
 ## Requirements
 
