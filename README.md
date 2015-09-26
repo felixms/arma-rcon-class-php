@@ -48,6 +48,7 @@ catch (Exception $e)
     echo "Ups! Something went wrong.";
 }
 ```
+
 ## Functions
 ARC features a bunch of functions, which are predefined BattlEye commands (see https://community.bistudio.com/wiki/BattlEye):
 * `command()`:  Sends any command to the server.
@@ -63,5 +64,9 @@ ARC features a bunch of functions, which are predefined BattlEye commands (see h
 * `remove_ban($banid)`:  Removes a ban.
 * `write_bans()`:  Removes expired bans from bans file.
 
+## Suggestions
+If you got suggestions or new ideas, feel free to contact me via E-Mail (nizari@starwolf-dev.com) or you can submit a new issue here on GitHub
+
 ## License
+&copy;2015 Felix Schäfer <starwolf-dev.com>
 Code released under the MIT-License. See license file for more information.
