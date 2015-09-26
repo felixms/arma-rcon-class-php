@@ -14,9 +14,9 @@ Please consider that mods normally don't change the BattlEye server settings, so
 ## Requirements
 
 ## Installation
-To use the class in your project, just inlcude rcon.php.
+To use the class in your project, just inlcude rcon.php in your files.
 ```php
-require_once {PATH_TO_RCON.PHP}/rcon.php
+require_once {PATH_TO_RCON.PHP}/rcon.php;
 ```
 
 ## Examples
