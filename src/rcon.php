@@ -8,7 +8,7 @@
  * @since   September 26, 2015
  * @link    https://github.com/Nizarii/arma3-rcon-php-class
  * @license MIT-License
- * @version 1.0.0
+ * @version 1.0.1
  *
  */
 
@@ -20,7 +20,7 @@ class ARC {
      * @var array
      */
     private $options = array (
-        'send_heartbeat'       => true,
+        'send_heartbeat'       => false,
     );
 
 
@@ -287,7 +287,7 @@ class ARC {
 
 
     /**
-     * Sends a global message to all players
+     * Sends a message to a specific player
      *
      * @param string $player Player who is sent the message
      * @param string $message The message for the player
