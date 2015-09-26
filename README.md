@@ -22,4 +22,4 @@ require_once '{PATH_TO_RCON.PHP}/rcon.php';
 ## Examples
 
 ## License
-Code released under the MIT-License.
+Code released under the MIT-License. See license file for more information.
