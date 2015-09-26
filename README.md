@@ -69,4 +69,5 @@ If you got suggestions or new ideas, feel free to contact me via E-Mail (nizari@
 
 ## License
 &copy;2015 Felix Schäfer <starwolf-dev.com>
+
 Code released under the MIT-License. See license file for more information.
