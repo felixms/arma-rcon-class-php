@@ -10,7 +10,6 @@ Please consider that mods normally don't change the BattlEye server settings, so
 |233780         | Arma 3        | :white_check_mark: |
 |33935          | Arma 2: Operation Arrowhead       | :white_check_mark: |
 |33905          | Arma 2        | :white_check_mark: |
-*More Arma games are being tested at the moment.*
 
 ## Requirements
 
