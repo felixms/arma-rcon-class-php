@@ -1,6 +1,6 @@
-# Arma RCON PHP-Class
+# Arma RCON Class for PHP (ARC)
 
-This class let's you easily send RCON commands to your Arma server. See "Games Supported" for a full list of supported Arma servers.
+ARC let's you easily send RCON commands to your Arma server. See "Games Supported" for a full list of supported Arma servers.
 
 ## Games Supported
 Please consider that mods normally don't change the BattlEye server settings, so this class also works for sending RCON commands  to servers running mods (e.g Altis Life, DayZ, Epoch etc.).
