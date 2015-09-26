@@ -26,7 +26,7 @@ After including `rcon.php` in your project, you need to create a new object, e.g
 ```php
 $rcon = new ARC("Your server IP", Port, "RCon password");
 ```
-Then you can send commands with the `command()` function:
+Then you are able to send commands with the `command()` function:
 ```php
 $rcon->command("Say -1 hello!");
 ```
@@ -59,13 +59,13 @@ ARC features a bunch of functions, which are predefined BattlEye commands (see h
 * `max_ping($ping)`:  Changes the MaxPing value. If a player has a higher ping, he will be kicked from the server.
 * `change_password($password)`:  Changes the RCon password.
 * `load_bans()`:  (Re)load the BE ban list from bans.txt.
-* `ban_player($player, $reason = "Banned", $time = 0)`:  Ban a player's BE GUID from the server. If time is not specified or 0, the ban will be permanent; if reason is not specified the player will be kicked with "Banned".
-* `add_ban($player, $reason = "Banned", $time = 0)`:  Same as "ban_player", but allows to ban a player that is not currently on the server.
+* `ban_player($player, $reason, $time)`:  Ban a player's BE GUID from the server. If time is not specified or 0, the ban will be permanent; if reason is not specified the player will be kicked with "Banned".
+* `add_ban($player, $reason, $time)`:  Same as "ban_player", but allows to ban a player that is not currently on the server.
 * `remove_ban($banid)`:  Removes a ban.
 * `write_bans()`:  Removes expired bans from bans file.
 
 ## Suggestions
-If you got suggestions or new ideas, feel free to contact me via E-Mail (nizari@starwolf-dev.com) or you can submit a new issue here on GitHub
+If you have suggestions or new ideas, feel free to contact me via E-Mail (nizari@starwolf-dev.com) or you can submit a new issue here on GitHub
 
 ## License
 &copy;2015 Felix Schäfer <starwolf-dev.com>
