@@ -12,14 +12,14 @@ Please consider that mods normally don't change the BattlEye server settings, so
 |33905          | Arma 2        | :white_check_mark: |
 
 ## Requirements
-* PHP5
-
+ARC only requires **PHP5**, nothing more!
+<br>
 ## Installation
 To use ARC in your project, just inlcude `rcon.php` in your project.
 ```php
 require_once '{PATH_TO_RCON.PHP}/rcon.php';
 ```
-
+<br>
 ## Examples
 After including `rcon.php` in your project, you need to create a new object, e.g:
 ```php
@@ -47,7 +47,7 @@ catch (Exception $e)
     echo "Ups! Something went wrong.";
 }
 ```
-
+<br>
 ## Functions
 ARC features many functions to send BattlEye commands easier:
 * `command()`:  Sends any command to the server.
@@ -67,10 +67,10 @@ ARC features many functions to send BattlEye commands easier:
 * `write_bans()`:  Removes expired bans from bans file.
 
 *See [here](https://community.bistudio.com/wiki/BattlEye "BattlEye Wiki") for more information about BattlEye*
-
+<br>
 ## Suggestions
 If you have suggestions or new ideas, feel free to contact me via E-Mail (nizari@starwolf-dev.com) or submit a new issue here on GitHub.
-
+<br>
 ## License
 &copy;2015 Felix Schäfer <starwolf-dev.com>
 
