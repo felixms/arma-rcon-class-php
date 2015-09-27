@@ -247,8 +247,7 @@ class ARC {
      */
     public function command($command)
     {
-        $result = $this->send($command);
-        return $result;
+        return $this->send($command);
     }
 
 
@@ -333,8 +332,7 @@ class ARC {
      */
     public function get_players()
     {
-        $players = $this->send("players");
-        return $players;
+        return $this->send("players");
     }
 
 
@@ -345,8 +343,7 @@ class ARC {
      */
     public function get_bans()
     {
-        $bans = $this->send("bans");
-        return $bans;
+        return $this->send("bans");
     }
 
 
@@ -357,8 +354,7 @@ class ARC {
      */
     public function get_missions()
     {
-        $missions = $this->send("missions");
-        return $missions;
+         return $this->send("missions");
     }
 
 
