@@ -8,7 +8,7 @@
  * @since   September 26, 2015
  * @link    https://github.com/Nizarii/arma3-rcon-php-class
  * @license MIT-License
- * @version 1.0.1
+ * @version 1.2.1
  *
  */
 
@@ -75,9 +75,9 @@ class ARC {
      * @param string $serverIP        IP of the Arma server
      * @param integer $serverPort     Port of the Arma server
      * @param string  $RCONpassword   The RCon password required by BattlEye
-     * @param array  $options         Options of ARC
+     * @param array  $options         The options arry of ARC
      *
-     * @throws Exception if the socket creation fails
+     * @throws Exception if creating the socket fails
      */
     public function __construct($serverIP, $serverPort = 2302, $RCONpassword ,array $options = array())
     {
@@ -89,7 +89,9 @@ class ARC {
 
         $this->msgseq = 0;
 
-        $this->socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+        $this->socket = fsockopen("udp://".$this->serverIP, $this->serverPort, $errno, $errstr, 1);
+
+        stream_set_timeout($this->socket, 1);
 
         if(!$this->socket)
         {
@@ -106,16 +108,7 @@ class ARC {
      */
     public function __destruct()
     {
-        $this->connection_close();
-    }
-
-    /**
-     * Closes the connection
-     */
-    private function connection_close()
-    {
         $this->send("Exit");
-        socket_close($this->socket);
     }
 
 
@@ -128,28 +121,21 @@ class ARC {
     {
         $loginmsg = $this->get_loginmessage();
 
-        $len = strlen($loginmsg);
 
-        $sent = socket_sendto($this->socket, $loginmsg, $len, 0, $this->serverIP, $this->serverPort);
+        $sent = fwrite($this->socket, $loginmsg);
 
         if($sent == false)
         {
             throw new Exception('[ARC] Failed to send login!');
         }
 
-        socket_recvfrom($this->socket, $buf, 64, 0, $this->serverIP, $this->serverPort);
+        $res = fread($this->socket, 16);
 
-        if(ord($buf[strlen($buf)-1]) == 0)
+        if(ord($res[strlen($res)-1]) == 0)
         {
             throw new Exception('[ARC] Login failed!');
         }
 
-        $recv = socket_recvfrom($this->socket, $buf, 64, 0, $this->serverIP, $this->serverPort);
-
-        if($recv == false)
-        {
-            throw new Exception('[ARC] Failed to receive data: '.socket_last_error());
-        }
 
         if ($this->options['send_heartbeat'])
         {
@@ -172,7 +158,6 @@ class ARC {
 
         return $authCRC;
     }
-
 
 
     /**
@@ -215,41 +200,42 @@ class ARC {
     {
         $hb_msg = "BE".chr(hexdec("7d")).chr(hexdec("8f")).chr(hexdec("ef")).chr(hexdec("73"));
         $hb_msg .= chr(hexdec('ff')).chr(hexdec('02')).chr(hexdec('00'));
-        $len = strlen($hb_msg);
 
-        $sent_hb = socket_sendto($this->socket, $hb_msg, $len, 0, $this->serverIP, $this->serverPort);
-
-        if ($sent_hb == false) {
-            throw new Exception('[ARC] Failed to send heartbeat to server: '.socket_last_error());
+        $sent = fwrite($this->socket, $hb_msg);
+        
+        if ($sent == false)
+        {
+            throw new Exception('[ARC] Failed to send heartbeat packet!');
         }
     }
 
 
     /**
-     * The heart of this class - this function sends the RCON command
+     * The heart of this class - this function actually sends the RCON command
      *
      * @param string $command The command sent to the server
      * @throws Exception if sending the command fails
+     * @returns string The answer of the server
      */
     private function send($command)
     {
         $msgCRC = $this->get_msgCRC($command);
 
-        $buf = "BE".chr(hexdec($msgCRC[0])).chr(hexdec($msgCRC[1])).chr(hexdec($msgCRC[2])).chr(hexdec($msgCRC[3]));
-        $buf .= chr(hexdec('ff')).chr(hexdec('01')).chr(hexdec(sprintf('%01b',$this->msgseq))).$command;
+        $msg = "BE".chr(hexdec($msgCRC[0])).chr(hexdec($msgCRC[1])).chr(hexdec($msgCRC[2])).chr(hexdec($msgCRC[3]));
+        $msg .= chr(hexdec('ff')).chr(hexdec('01')).chr(hexdec(sprintf('%01b',$this->msgseq))).$command;
 
-        $len = strlen($buf);
+        $sent = fwrite($this->socket, $msg);
 
-        $sent_command = socket_sendto($this->socket, $buf, $len, 0, $this->serverIP, $this->serverPort);
+        if ($sent == false)
+        {
+            throw new Exception('[ARC] Failed to send command to server');
+        }
 
         $this->msgseq++;
 
-        if($sent_command == false)
-        {
-            throw new Exception('[ARC] Failed to send command: '.socket_last_error());
-        }
+        $answer = fread($this->socket, 102400);
 
-
+        return $answer;
     }
 
 
@@ -257,17 +243,19 @@ class ARC {
      * Sends a custom command to the BattlEye server
      *
      * @param string $command The command sent to the server
+     * @returns string Answer of the server
      */
     public function command($command)
     {
-        $this->send($command);
+        $result = $this->send($command);
+        return $result;
     }
 
 
     /**
      * Kicks a player who is currently on the server
      *
-     * @param string $player The player who should be kicked
+     * @param integer $player The player who should be kicked
      */
     public function kick_player($player)
     {
@@ -289,12 +277,12 @@ class ARC {
     /**
      * Sends a message to a specific player
      *
-     * @param string $player Player who is sent the message
+     * @param integer $player Player who is sent the message
      * @param string $message The message for the player
      */
     public function say_player($player, $message)
     {
-        $this->send("Say ".$player." ".$message);
+        $this->send("Say ".$player.$message);
     }
 
 
@@ -330,11 +318,47 @@ class ARC {
 
 
     /**
-     * (Re)load the BE ban list from bans.txt.
+     * (Re)load the BE ban list from bans.txt
      */
     public function load_bans()
     {
         $this->send("loadBans");
+    }
+
+
+    /**
+     * Gets a list of all players currently on the server
+     *
+     * @returns string list of all players
+     */
+    public function get_players()
+    {
+        $players = $this->send("players");
+        return $players;
+    }
+
+
+    /**
+     * Gets a list of all bans
+     *
+     * @returns string list of bans
+     */
+    public function get_bans()
+    {
+        $bans = $this->send("bans");
+        return $bans;
+    }
+
+
+    /**
+     * Gets a list of all bans
+     *
+     * @returns string list of bans
+     */
+    public function get_missions()
+    {
+        $missions = $this->send("missions");
+        return $missions;
     }
 
 
@@ -352,7 +376,7 @@ class ARC {
 
 
     /**
-     * Same as "ban_player", but allows to ban a player that is not currently on the server.
+     * Same as "ban_player", but allows to ban a player that is not currently on the server
      *
      * @param string $player Player who will be banned
      * @param string $reason Reason why the player is banned
@@ -382,5 +406,4 @@ class ARC {
     {
         $this->send("writeBans");
     }
-
 }
