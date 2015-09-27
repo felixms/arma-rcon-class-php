@@ -1,5 +1,4 @@
 <?php
-
 /**
  *
  * An easy-to-use PHP class to send commands via  RCon to Arma servers.
@@ -8,11 +7,11 @@
  * @since   September 26, 2015
  * @link    https://github.com/Nizarii/arma3-rcon-php-class
  * @license MIT-License
- * @version 1.2.1
+ * @version 1.2.4
  *
  */
-
 class ARC {
+
 
     /**
      * ARC Options
@@ -61,15 +60,6 @@ class ARC {
 
 
     /**
-     * msgseq
-     *  Get's bigger each command
-     *
-     * @var integer
-     */
-    private $msgseq;
-
-
-    /**
      * Class constructor
      *
      * @param string $serverIP        IP of the Arma server
@@ -83,23 +73,18 @@ class ARC {
     {
         $this->serverIP = $serverIP;
         $this->serverPort = $serverPort;
-
         $this->RCONpassword = $RCONpassword;
         $this->options = array_merge($this->options, $options);
-
-        $this->msgseq = 0;
-
         $this->socket = fsockopen("udp://".$this->serverIP, $this->serverPort, $errno, $errstr, 1);
-
+        
         stream_set_timeout($this->socket, 1);
-
+        
         if(!$this->socket)
         {
             throw new Exception('[ARC] Failed creating a socket!');
         }
-
+        
         $this->send_login();
-
     }
 
 
@@ -120,8 +105,6 @@ class ARC {
     private function send_login()
     {
         $loginmsg = $this->get_loginmessage();
-
-
         $sent = fwrite($this->socket, $loginmsg);
 
         if($sent == false)
@@ -136,12 +119,10 @@ class ARC {
             throw new Exception('[ARC] Login failed!');
         }
 
-
         if ($this->options['send_heartbeat'])
         {
             $this->send_heartbeat();
         }
-
     }
 
 
@@ -152,8 +133,7 @@ class ARC {
      */
     private function get_authCRC()
     {
-        $authCRC = crc32(chr(255).chr(00).trim($this->RCONpassword));
-        $authCRC = sprintf("%x", $authCRC);
+        $authCRC = sprintf("%x", crc32(chr(255).chr(00).trim($this->RCONpassword)));
         $authCRC = array(substr($authCRC,-2,2),substr($authCRC,-4,2),substr($authCRC,-6,2),substr($authCRC,0,2));
 
         return $authCRC;
@@ -167,8 +147,8 @@ class ARC {
      */
     private function get_msgCRC($command)
     {
-        $msgCRC = crc32(chr(255).chr(01).chr(hexdec(sprintf('%01b',$this->msgseq))).$command);
-        $msgCRC = sprintf("%x", $msgCRC);
+
+        $msgCRC = sprintf("%x", crc32(chr(255).chr(01).chr(hexdec(sprintf('%01b', 0))).$command));
         $msgCRC = array(substr($msgCRC,-2,2),substr($msgCRC,-4,2),substr($msgCRC,-6,2),substr($msgCRC,0,2));
 
         return $msgCRC;
@@ -200,9 +180,9 @@ class ARC {
     {
         $hb_msg = "BE".chr(hexdec("7d")).chr(hexdec("8f")).chr(hexdec("ef")).chr(hexdec("73"));
         $hb_msg .= chr(hexdec('ff')).chr(hexdec('02')).chr(hexdec('00'));
-
-        $sent = fwrite($this->socket, $hb_msg);
         
+        $sent = fwrite($this->socket, $hb_msg);
+
         if ($sent == false)
         {
             throw new Exception('[ARC] Failed to send heartbeat packet!');
@@ -220,9 +200,8 @@ class ARC {
     private function send($command)
     {
         $msgCRC = $this->get_msgCRC($command);
-
         $msg = "BE".chr(hexdec($msgCRC[0])).chr(hexdec($msgCRC[1])).chr(hexdec($msgCRC[2])).chr(hexdec($msgCRC[3]));
-        $msg .= chr(hexdec('ff')).chr(hexdec('01')).chr(hexdec(sprintf('%01b',$this->msgseq))).$command;
+        $msg .= chr(hexdec('ff')).chr(hexdec('01')).chr(hexdec(sprintf('%01b', 0))).$command;
 
         $sent = fwrite($this->socket, $msg);
 
@@ -230,8 +209,6 @@ class ARC {
         {
             throw new Exception('[ARC] Failed to send command to server');
         }
-
-        $this->msgseq++;
 
         $answer = fread($this->socket, 102400);
 
@@ -310,6 +287,8 @@ class ARC {
      *
      * @param string $password New password
      */
+
+
     public function change_password($password)
     {
         $this->send("RConPassword ".$password);
@@ -354,7 +333,7 @@ class ARC {
      */
     public function get_missions()
     {
-         return $this->send("missions");
+        return $this->send("missions");
     }
 
 
