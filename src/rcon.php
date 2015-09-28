@@ -8,7 +8,7 @@
  * @since   September 26, 2015
  * @link    https://github.com/Nizarii/arma3-rcon-php-class
  * @license MIT-License
- * @version 1.2.5
+ * @version 1.2.6
  *
  */
 
@@ -217,7 +217,7 @@ class ARC {
             throw new Exception('[ARC] Failed to send command to server');
         }
 
-        $answer = fread($this->socket, 102400);
+        $answer = substr(fread($this->socket, 102400), strlen($msg) - strlen($command));
 
         return $answer;
     }
