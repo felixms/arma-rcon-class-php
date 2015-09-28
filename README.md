@@ -1,7 +1,8 @@
 # Arma RCon Class for PHP (ARC)
 
-ARC let's you easily send commands via  RCon to your Arma server. See "Games Supported" for a full list of supported Arma games.
-
+ARC is a lightweight PHP class, which let's you easily send commands via  RCon to your Arma server. See "Games Supported" for a full list of supported Arma games.
+<br>
+<br>
 ## Games Supported
 Please consider that mods normally don't change the BattlEye server settings, so this class also works for sending RCON commands  to servers running mods (e.g Altis Life, DayZ, Epoch etc.).
 
@@ -10,14 +11,17 @@ Please consider that mods normally don't change the BattlEye server settings, so
 |233780         | Arma 3        | :white_check_mark: |
 |33935          | Arma 2: Operation Arrowhead       | :white_check_mark: |
 |33905          | Arma 2        | :white_check_mark: |
+<br>
 ## Requirements
 ARC only requires **PHP5**, nothing more!
+<br>
 <br>
 ## Installation
 To use ARC in your project, just inlcude `rcon.php` in your project.
 ```php
 require_once '{PATH_TO_RCON.PHP}/rcon.php';
 ```
+<br>
 ## Examples
 #### Getting started
 After including `rcon.php` in your project, you need to create a new object, e.g:
@@ -51,7 +55,7 @@ Another option is `timeout_seconds`, which sets a timeout value on the connectio
 ```php
 $rcon = new ARC("Your server IP", Port, "RCon password", array (
         'send_heartbeat'       => true,
-        'timeout_seconds'      => 1,
+        'timeout_seconds'      => 1, // by default 1 second
     ));
 ```
 <br>
