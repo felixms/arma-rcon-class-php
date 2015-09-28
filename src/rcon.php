@@ -1,15 +1,17 @@
 <?php
+
 /**
  *
- * An easy-to-use PHP class to send commands via  RCon to Arma servers.
+ * ARC, an easy-to-use PHP class to send commands via  RCon to Arma servers.
  *
  * @author  Felix Schäfer <nizari@starwolf-dev.com>
  * @since   September 26, 2015
  * @link    https://github.com/Nizarii/arma3-rcon-php-class
  * @license MIT-License
- * @version 1.2.4
+ * @version 1.2.5
  *
  */
+
 class ARC {
 
 
@@ -20,6 +22,7 @@ class ARC {
      */
     private $options = array (
         'send_heartbeat'       => false,
+        'timeout_seconds'      => 1,
     );
 
 
@@ -75,16 +78,17 @@ class ARC {
         $this->serverPort = $serverPort;
         $this->RCONpassword = $RCONpassword;
         $this->options = array_merge($this->options, $options);
-        $this->socket = fsockopen("udp://".$this->serverIP, $this->serverPort, $errno, $errstr, 1);
-        
-        stream_set_timeout($this->socket, 1);
-        
+        $this->socket = fsockopen("udp://".$this->serverIP, $this->serverPort, $errno, $errstr, $this->options['timeout_seconds']);
+
+        stream_set_timeout($this->socket, $this->options['timeout_seconds']);
+        stream_set_blocking($this->socket, true);
+
         if(!$this->socket)
         {
-            throw new Exception('[ARC] Failed creating a socket!');
+            throw new Exception('[ARC] Failed to create socket!');
         }
-        
-        $this->send_login();
+
+        $this->authorize();
     }
 
 
@@ -94,6 +98,9 @@ class ARC {
     public function __destruct()
     {
         $this->send("Exit");
+
+        fclose($this->socket);
+        $this->socket = null;
     }
 
 
@@ -102,7 +109,7 @@ class ARC {
      *
      * @throws Exception if login fails
      */
-    private function send_login()
+    private function authorize()
     {
         $loginmsg = $this->get_loginmessage();
         $sent = fwrite($this->socket, $loginmsg);
@@ -116,7 +123,7 @@ class ARC {
 
         if(ord($res[strlen($res)-1]) == 0)
         {
-            throw new Exception('[ARC] Login failed!');
+            throw new Exception('[ARC] Login failed, wrong password!');
         }
 
         if ($this->options['send_heartbeat'])
@@ -180,7 +187,7 @@ class ARC {
     {
         $hb_msg = "BE".chr(hexdec("7d")).chr(hexdec("8f")).chr(hexdec("ef")).chr(hexdec("73"));
         $hb_msg .= chr(hexdec('ff')).chr(hexdec('02')).chr(hexdec('00'));
-        
+
         $sent = fwrite($this->socket, $hb_msg);
 
         if ($sent == false)
