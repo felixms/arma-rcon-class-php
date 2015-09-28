@@ -21,6 +21,8 @@ require_once '{PATH_TO_RCON.PHP}/rcon.php';
 ```
 <br>
 ## Examples
+<br>
+#### Getting started
 After including `rcon.php` in your project, you need to create a new object, e.g:
 ```php
 $rcon = new ARC("Your server IP", Port, "RCon password");
@@ -28,12 +30,6 @@ $rcon = new ARC("Your server IP", Port, "RCon password");
 Then you are able to send commands with the `command()` function:
 ```php
 $rcon->command("Say -1 hello!"); // To say something in global chat, you may use 'say_global()', see 'Functions'
-```
-ARC can also send a heartbeat packet to the server. In order to do this, you need to enable it:
-```php
-$rcon = new ARC("Your server IP", Port, "RCon password", array (
-        'heartbeat' => true,
-    ));
 ```
 ARC will throw Exceptions if anything goes wrong, so you could do a try-catch function:
 ```php
@@ -46,6 +42,21 @@ catch (Exception $e)
 {
     echo "Ups! Something went wrong.";
 }
+```
+<br>
+#### Options
+ARC can send a heartbeat packet to the server. In order to do this, you need to enable it:
+```php
+$rcon = new ARC("Your server IP", Port, "RCon password", array (
+        'heartbeat' => true,
+    ));
+```
+Another option is `timeout_seconds`, which sets a timeout value on the connection:
+```php
+$rcon = new ARC("Your server IP", Port, "RCon password", array (
+        'send_heartbeat'       => true,
+        'timeout_seconds'      => 1,
+    ));
 ```
 <br>
 ## Functions
