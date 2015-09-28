@@ -1,9 +1,9 @@
 # Arma RCon Class for PHP (ARC)
 
-ARC is a lightweight PHP class, which let's you easily send commands via  RCon to your Arma server. See "Games Supported" for a full list of supported Arma games.
+ARC is a lightweight PHP class, which let's you easily send commands via  RCon to your Arma server. See "Supported Server" for a full list of supported Arma games.
 <br>
 <br>
-## Games Supported
+## Supported Server
 Please consider that mods normally don't change the BattlEye server settings, so this class also works for sending RCON commands  to servers running mods (e.g Altis Life, DayZ, Epoch etc.).
 
 | App ID        | Game          | RCON Support       |
@@ -79,8 +79,10 @@ ARC features many functions to send BattlEye commands easier:
 
 *See [here](https://community.bistudio.com/wiki/BattlEye "BattlEye Wiki") for more information about BattlEye*
 <br>
+<br>
 ## Suggestions
 If you have suggestions or new ideas, feel free to contact me via E-Mail (nizari@starwolf-dev.com) or submit a new issue here on GitHub.
+<br>
 <br>
 ## License
 &copy;2015 Felix Schäfer <starwolf-dev.com>
