@@ -10,7 +10,6 @@ Please consider that mods normally don't change the BattlEye server settings, so
 |233780         | Arma 3        | :white_check_mark: |
 |33935          | Arma 2: Operation Arrowhead       | :white_check_mark: |
 |33905          | Arma 2        | :white_check_mark: |
-
 ## Requirements
 ARC only requires **PHP5**, nothing more!
 <br>
@@ -21,7 +20,6 @@ require_once '{PATH_TO_RCON.PHP}/rcon.php';
 ```
 <br>
 ## Examples
-<br>
 #### Getting started
 After including `rcon.php` in your project, you need to create a new object, e.g:
 ```php
