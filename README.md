@@ -18,7 +18,6 @@ To use ARC in your project, just inlcude `rcon.php` in your project.
 ```php
 require_once '{PATH_TO_RCON.PHP}/rcon.php';
 ```
-<br>
 ## Examples
 #### Getting started
 After including `rcon.php` in your project, you need to create a new object, e.g:
@@ -41,7 +40,6 @@ catch (Exception $e)
     echo "Ups! Something went wrong.";
 }
 ```
-<br>
 #### Options
 ARC can send a heartbeat packet to the server. In order to do this, you need to enable it:
 ```php
