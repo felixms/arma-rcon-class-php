@@ -217,9 +217,7 @@ class ARC {
             throw new Exception('[ARC] Failed to send command to server');
         }
 
-        $answer = substr(fread($this->socket, 102400), strlen($msg) - strlen($command));
-
-        return $answer;
+        return substr(fread($this->socket, 102400), strlen($msg) - strlen($command));
     }
 
 
