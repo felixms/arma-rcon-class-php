@@ -8,7 +8,7 @@
  * @since   September 26, 2015
  * @link    https://github.com/Nizarii/arma3-rcon-php-class
  * @license MIT-License
- * @version 1.2.6
+ * @version 1.2.7
  *
  */
 
@@ -207,8 +207,8 @@ class ARC {
     private function send($command)
     {
         $msgCRC = $this->get_msgCRC($command);
-        $msg = "BE".chr(hexdec($msgCRC[0])).chr(hexdec($msgCRC[1])).chr(hexdec($msgCRC[2])).chr(hexdec($msgCRC[3]));
-        $msg .= chr(hexdec('ff')).chr(hexdec('01')).chr(hexdec(sprintf('%01b', 0))).$command;
+        $head = "BE".chr(hexdec($msgCRC[0])).chr(hexdec($msgCRC[1])).chr(hexdec($msgCRC[2])).chr(hexdec($msgCRC[3])).chr(hexdec('ff')).chr(hexdec('01')).chr(hexdec(sprintf('%01b', 0)));
+        $msg = $head.$command;
 
         $sent = fwrite($this->socket, $msg);
 
@@ -217,7 +217,14 @@ class ARC {
             throw new Exception('[ARC] Failed to send command to server');
         }
 
-        return substr(fread($this->socket, 102400), strlen($msg) - strlen($command));
+        $answer = substr(fread($this->socket, 102400), strlen($head));
+
+        while (strpos($answer,'RCon admin') !== false)
+        {
+            $answer = substr(fread($this->socket, 102400), strlen($head));
+        }
+
+        return $answer;
     }
 
 
