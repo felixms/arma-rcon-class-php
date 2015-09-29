@@ -8,7 +8,7 @@
  * @since   September 26, 2015
  * @link    https://github.com/Nizarii/arma3-rcon-php-class
  * @license MIT-License
- * @version 1.2.7
+ * @version 1.2.8
  *
  */
 
@@ -60,6 +60,15 @@ class ARC {
      * @var object
      */
     private $socket;
+
+
+    /**
+     * Header
+     *  The header of a sent message
+     *
+     * @var string
+     */
+    private $header;
 
 
     /**
@@ -198,6 +207,24 @@ class ARC {
 
 
     /**
+     * Receives the answer form the server
+     *
+     * @returns string the answer
+     */
+    private function get_answer()
+    {
+        $answer = substr(fread($this->socket, 102400), strlen($this->header));
+
+        while (strpos($answer,'RCon admin') !== false)
+        {
+            $answer = substr(fread($this->socket, 102400), strlen($this->header));
+        }
+
+        return $answer;
+    }
+
+
+    /**
      * The heart of this class - this function actually sends the RCON command
      *
      * @param string $command The command sent to the server
@@ -210,21 +237,14 @@ class ARC {
         $head = "BE".chr(hexdec($msgCRC[0])).chr(hexdec($msgCRC[1])).chr(hexdec($msgCRC[2])).chr(hexdec($msgCRC[3])).chr(hexdec('ff')).chr(hexdec('01')).chr(hexdec(sprintf('%01b', 0)));
         $msg = $head.$command;
 
+        $this->header = $head;
+
         $sent = fwrite($this->socket, $msg);
 
         if ($sent == false)
         {
             throw new Exception('[ARC] Failed to send command to server');
         }
-
-        $answer = substr(fread($this->socket, 102400), strlen($head));
-
-        while (strpos($answer,'RCon admin') !== false)
-        {
-            $answer = substr(fread($this->socket, 102400), strlen($head));
-        }
-
-        return $answer;
     }
 
 
@@ -236,7 +256,8 @@ class ARC {
      */
     public function command($command)
     {
-        return $this->send($command);
+        $this->send($command);
+        return $this->get_answer();
     }
 
 
@@ -323,7 +344,8 @@ class ARC {
      */
     public function get_players()
     {
-        return $this->send("players");
+        $this->send("players");
+        return $this->get_answer();
     }
 
 
@@ -334,7 +356,8 @@ class ARC {
      */
     public function get_bans()
     {
-        return $this->send("bans");
+        $this->send("bans");
+        return $this->get_answer();
     }
 
 
@@ -345,7 +368,8 @@ class ARC {
      */
     public function get_missions()
     {
-        return $this->send("missions");
+        $this->send("missions");
+        return $this->get_answer();
     }
 
 
