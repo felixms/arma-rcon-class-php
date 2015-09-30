@@ -6,7 +6,7 @@
  *
  * @author  Felix Schäfer <nizari@starwolf-dev.com>
  * @since   September 26, 2015
- * @link    https://github.com/Nizarii/arma3-rcon-php-class
+ * @link    https://github.com/Nizarii/arma-rcon-class-php
  * @license MIT-License
  * @version 1.2.8
  *
