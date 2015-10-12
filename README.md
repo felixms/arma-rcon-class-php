@@ -41,7 +41,7 @@ try
 } 
 catch (Exception $e) 
 {
-    echo "Ups! Something went wrong.";
+    echo "Ups! Something went wrong: ".$e->getMessage();
 }
 ```
 #### Options
@@ -61,7 +61,7 @@ $rcon = new ARC("Your server IP", Port, "RCon password", array (
 <br>
 ## Functions
 ARC features many functions to send BattlEye commands easier:
-* `command()`:  Sends any command to the server.
+* `command()`:  Sends any command to the BattlEye server and returns its answer as a string.
 * `kick_player($player)`:  Kicks a player who is currently on the server.
 * `get_players()`:  Returns a list of all players online.
 * `say_global($message)`:  Sends a global message to all players.
