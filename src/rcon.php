@@ -6,9 +6,9 @@
  *
  * @author  Felix Schäfer <nizari@starwolf-dev.com>
  * @since   September 26, 2015
- * @link    https://github.com/Nizarii/arma-rcon-class-php
+ * @link    https://github.com/Nizarii/arma3-rcon-php-class
  * @license MIT-License
- * @version 1.2.8
+ * @version 1.2.9
  *
  */
 
@@ -94,7 +94,7 @@ class ARC {
 
         if(!$this->socket)
         {
-            throw new Exception('[ARC] Failed to create socket!');
+            throw new SocketException('[ARC] Failed to create socket!');
         }
 
         $this->authorize();
@@ -107,8 +107,8 @@ class ARC {
     public function __destruct()
     {
         $this->send("Exit");
-
         fclose($this->socket);
+
         $this->socket = null;
     }
 
@@ -125,14 +125,14 @@ class ARC {
 
         if($sent == false)
         {
-            throw new Exception('[ARC] Failed to send login!');
+            throw new PacketException('[ARC] Failed to send login!');
         }
 
         $res = fread($this->socket, 16);
 
         if(ord($res[strlen($res)-1]) == 0)
         {
-            throw new Exception('[ARC] Login failed, wrong password!');
+            throw new AuthorizationException('[ARC] Login failed, wrong password!');
         }
 
         if ($this->options['send_heartbeat'])
@@ -201,7 +201,7 @@ class ARC {
 
         if ($sent == false)
         {
-            throw new Exception('[ARC] Failed to send heartbeat packet!');
+            throw new PacketException('[ARC] Failed to send heartbeat packet!');
         }
     }
 
@@ -243,7 +243,7 @@ class ARC {
 
         if ($sent == false)
         {
-            throw new Exception('[ARC] Failed to send command to server');
+            throw new PacketException('[ARC] Failed to send command to server');
         }
     }
 
@@ -418,3 +418,12 @@ class ARC {
         $this->send("writeBans");
     }
 }
+
+
+
+/*
+ * Defines some custom Exceptions
+ */
+class PacketException extends Exception {}
+class SocketException extends Exception {}
+class AuthorizationException extends Exception {}
