@@ -6,7 +6,7 @@
  *
  * @author  Felix Schäfer <nizari@starwolf-dev.com>
  * @since   September 26, 2015
- * @link    https://github.com/Nizarii/arma3-rcon-php-class
+ * @link    https://github.com/Nizarii/arma-rcon-php-class
  * @license MIT-License
  * @version 1.2.9
  *
@@ -209,7 +209,7 @@ class ARC {
     /**
      * Receives the answer form the server
      *
-     * @returns string the answer
+     * @return string
      */
     private function get_answer()
     {
@@ -229,7 +229,7 @@ class ARC {
      *
      * @param string $command The command sent to the server
      * @throws Exception if sending the command fails
-     * @returns string The answer of the server
+     * @return string 
      */
     private function send($command)
     {
@@ -252,7 +252,7 @@ class ARC {
      * Sends a custom command to the BattlEye server
      *
      * @param string $command The command sent to the server
-     * @returns string Answer of the server
+     * @return string
      */
     public function command($command)
     {
@@ -340,7 +340,7 @@ class ARC {
     /**
      * Gets a list of all players currently on the server
      *
-     * @returns string list of all players
+     * @return string
      */
     public function get_players()
     {
@@ -352,7 +352,7 @@ class ARC {
     /**
      * Gets a list of all bans
      *
-     * @returns string list of bans
+     * @return string
      */
     public function get_bans()
     {
@@ -364,7 +364,7 @@ class ARC {
     /**
      * Gets a list of all bans
      *
-     * @returns string list of bans
+     * @return string
      */
     public function get_missions()
     {
