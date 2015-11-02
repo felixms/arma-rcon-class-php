@@ -78,6 +78,8 @@ ARC features many functions to send BattlEye commands easier:
 * `add_ban($player, $reason, $time)`:  Same as "ban_player", but allows to ban a player that is not currently on the server.
 * `remove_ban($banid)`:  Removes a ban.
 * `write_bans()`:  Removes expired bans from bans file.
+* `disconnect()`:  Closes the connection to the BattlEye server manually, sending commands after calling this function is not possible
+* `connect()`:  Creates a new connection to a server, please remind to close the connection before using this function
 
 *See [here](https://community.bistudio.com/wiki/BattlEye "BattlEye Wiki") for more information about BattlEye*
 <br>
