@@ -84,10 +84,6 @@ ARC features many functions to send BattlEye commands easier:
 *See [here](https://community.bistudio.com/wiki/BattlEye "BattlEye Wiki") for more information about BattlEye*
 <br>
 <br>
-## Suggestions
-If you have suggestions or new ideas, feel free to contact me via E-Mail (nizari@starwolf-dev.com) or submit a new issue here on GitHub.
-<br>
-<br>
 ## License
 
 The MIT License (MIT)
