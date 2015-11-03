@@ -8,7 +8,7 @@
  * @since    September 26, 2015
  * @link     https://github.com/Nizarii/arma-rcon-php-class
  * @license  MIT-License
- * @version  1.3.0
+ * @version  1.3.1
  *
  */
 
@@ -76,24 +76,31 @@ namespace Nizarii {
 
 
         /**
+         * Connection Status
+         *  If this value is true, it means that the connection is closed,
+         *  so connect() is available
+         *
+         * @var bool
+         */
+        private $disconnected = true;
+
+
+        /**
          * Class constructor
          *
-         * @param string $serverIP        IP of the Arma server
-         * @param integer $serverPort     Port of the Arma server
-         * @param string  $RCONpassword   RCon password required by BattlEye
-         * @param array  $options         Options array of ARC
-         *
-         * @throws SocketException        If creating the socket fails
+         * @param string $serverIP             IP of the Arma server
+         * @param integer $serverPort          Port of the Arma server
+         * @param string  $RCONpassword        RCon password required by BattlEye
+         * @param array  $options              Options array of ARC
          */
         public function __construct($serverIP, $serverPort = 2302, $RCONpassword ,array $options = array())
         {
             $this->serverIP = $serverIP;
-
             $this->serverPort = $serverPort;
-
             $this->RCONpassword = $RCONpassword;
-
             $this->options = array_merge($this->options, $options);
+
+            $this->connect();
         }
 
 
@@ -116,22 +123,11 @@ namespace Nizarii {
             $loginmsg = $this->get_loginmessage();
             $sent = fwrite($this->socket, $loginmsg);
 
-            if($sent == false)
-            {
-                throw new PacketException('[ARC] Failed to send login!');
-            }
+            if($sent == false) throw new PacketException('[ARC] Failed to send login!');
 
             $res = fread($this->socket, 16);
 
-            if(ord($res[strlen($res)-1]) == 0)
-            {
-                throw new AuthorizationException('[ARC] Login failed, wrong password!');
-            }
-
-            if ($this->options['send_heartbeat'])
-            {
-                $this->send_heartbeat();
-            }
+            if(ord($res[strlen($res)-1]) == 0) throw new AuthorizationException('[ARC] Login failed, wrong password!');
         }
 
 
@@ -152,8 +148,8 @@ namespace Nizarii {
         /**
          * Generates the message's CRC32 data
          *
-         * @param string $command    The message which will be prepared for being sent to the server
-         * @return string            Message which can be sent to the server
+         * @param string $command   The message which will be prepared for being sent to the server
+         * @return string           Message which can be sent to the server
          */
         private function get_msgCRC($command)
         {
@@ -168,7 +164,7 @@ namespace Nizarii {
         /**
          * Generates the login message
          *
-         * @return string     The message for logging in, containing the RCon password
+         * @return string           The message for logging in, containing the RCon password
          */
         private function get_loginmessage()
         {
@@ -184,7 +180,7 @@ namespace Nizarii {
         /**
          * Sends optional a heartbeat to the server
          *
-         * @throws PacketException    If sending the command fails
+         * @throws PacketException  If sending the command fails
          */
         private function send_heartbeat()
         {
@@ -193,17 +189,14 @@ namespace Nizarii {
 
             $sent = fwrite($this->socket, $hb_msg);
 
-            if ($sent == false)
-            {
-                throw new PacketException('[ARC] Failed to send heartbeat packet!');
-            }
+            if ($sent == false) throw new PacketException('[ARC] Failed to send heartbeat packet!');
         }
 
 
         /**
          * Receives the answer form the server
          *
-         * @return string     Any answer from the server, except the log-in message
+         * @return string           Any answer from the server, except the log-in message
          */
         private function get_answer()
         {
@@ -221,8 +214,8 @@ namespace Nizarii {
         /**
          * The heart of this class - this function actually sends the RCON command
          *
-         * @param string $command      The command sent to the server
-         * @throws PacketException           If sending the command fails
+         * @param string $command   The command sent to the server
+         * @return bool             Whether sending the command was successful or not
          */
         private function send($command)
         {
@@ -232,123 +225,7 @@ namespace Nizarii {
 
             $this->header = $head;
 
-            $sent = fwrite($this->socket, $msg);
-
-            if ($sent == false)
-            {
-                throw new PacketException('[ARC] Failed to send command to server');
-            }
-        }
-
-
-        /**
-         * Sends a custom command to the BattlEye server
-         *
-         * @param string $command    Command sent to the server
-         * @return string            Answer from the server
-         */
-        public function command($command)
-        {
-            $this->send($command);
-            return $this->get_answer();
-        }
-
-
-        /**
-         * Kicks a player who is currently on the server
-         *
-         * @param integer $player   The player who should be kicked
-         */
-        public function kick_player($player)
-        {
-            $this->send("kick ".$player);
-        }
-
-
-        /**
-         * Sends a global message to all players
-         *
-         * @param string $message   The message to send
-         */
-        public function say_global($message)
-        {
-            $this->send("Say -1 ".$message);
-        }
-
-
-        /**
-         * Sends a message to a specific player
-         *
-         * @param integer $player   Player who is sent the message
-         * @param string $message   The message for the player
-         */
-        public function say_player($player, $message)
-        {
-            $this->send("Say ".$player.$message);
-        }
-
-
-        /**
-         * Loads the "scripts.txt" file without the need to restart the server
-         */
-        public function load_scripts()
-        {
-            $this->send("loadScripts");
-        }
-
-
-        /**
-         * Changes the MaxPing value. If a player has a higher ping, he will be kicked from the server
-         *
-         * @param integer $ping   Max ping
-         */
-        public function max_ping($ping)
-        {
-            $this->send("MaxPing ".$ping);
-        }
-
-
-        /**
-         * Changes the RCon password
-         *
-         * @param string $password   New password
-         */
-        public function change_password($password)
-        {
-            $this->send("RConPassword ".$password);
-        }
-
-
-        /**
-         * (Re)load the BE ban list from bans.txt
-         */
-        public function load_bans()
-        {
-            $this->send("loadBans");
-        }
-
-
-        /**
-         * Gets a list of all players currently on the server
-         *
-         * @return string  The list of all players on the server
-         */
-        public function get_players()
-        {
-            $this->send("players");
-            return $this->get_answer();
-        }
-
-
-        /**
-         * Gets a list of all bans
-         *
-         * @return string  The list of bans
-         */
-        public function get_bans()
-        {
-            $this->send("bans");
-            return $this->get_answer();
+            return fwrite($this->socket, $msg) == false ? false : true;
         }
 
 
@@ -360,47 +237,167 @@ namespace Nizarii {
          */
         public function disconnect()
         {
+            if ($this->disconnected) return;
+
             $this->send("Exit");
 
             fclose($this->socket);
 
             $this->socket = null;
+            $this->disconnected = true;
         }
 
 
         /**
-         * Creates again a connection to the server,
-         * only required if you manually closed the connection!
-         *
-         * @internal Also executes the authorization process.
+         * Creates again a connection to the server, manually closing the
+         * connection before is not needed.
          *
          * @see disconnect()
          */
         public function connect()
         {
+            if (!$this->disconnected) $this->disconnect();
+
             $this->socket = fsockopen("udp://".$this->serverIP, $this->serverPort, $errno, $errstr, $this->options['timeout_seconds']);
 
             stream_set_timeout($this->socket, $this->options['timeout_seconds']);
             stream_set_blocking($this->socket, true);
 
-            if(!$this->socket)
-            {
-                throw new SocketException('[ARC] Failed to create socket!');
-            }
+            if(!$this->socket) throw new SocketException('[ARC] Failed to create socket!');
 
             $this->authorize();
+
+            if ($this->options['send_heartbeat']) $this->send_heartbeat();
+
+            $this->disconnected = false;
+        }
+
+
+        /**
+         * Sends a custom command to the BattlEye server
+         *
+         * @param string $command   Command sent to the server
+         * @return string           Answer from the server
+         */
+        public function command($command)
+        {
+            return $this->send($command) ? $this->get_answer() : false;
+        }
+
+
+        /**
+         * Kicks a player who is currently on the server
+         *
+         * @param integer $player   The player who should be kicked
+         * @return bool             Whether sending the command was successful or not
+         */
+        public function kick_player($player)
+        {
+            return $this->send("kick ".$player);
+        }
+
+
+        /**
+         * Sends a global message to all players
+         *
+         * @param string $message   The message to send
+         * @return bool             Whether sending the command was successful or not
+         */
+        public function say_global($message)
+        {
+            return $this->send("Say -1 ".$message);
+        }
+
+
+        /**
+         * Sends a message to a specific player
+         *
+         * @param integer $player   Player who is sent the message
+         * @param string $message   The message for the player
+         * @return bool             Whether sending the command was successful or not
+         */
+        public function say_player($player, $message)
+        {
+            return $this->send("Say ".$player.$message);
+        }
+
+
+        /**
+         * Loads the "scripts.txt" file without the need to restart the server
+         *
+         * @return bool             Whether sending the command was successful or not
+         */
+        public function load_scripts()
+        {
+            return $this->send("loadScripts");
+        }
+
+
+        /**
+         * Changes the MaxPing value. If a player has a higher ping, he will be kicked from the server
+         *
+         * @param integer $ping     Max ping
+         * @return bool             Whether sending the command was successful or not
+         */
+        public function max_ping($ping)
+        {
+            return $this->send("MaxPing ".$ping);
+        }
+
+
+        /**
+         * Changes the RCon password
+         *
+         * @param string $password  The new password
+         * @return bool             Whether sending the command was successful or not
+         */
+        public function change_password($password)
+        {
+            return $this->send("RConPassword ".$password);
+        }
+
+
+        /**
+         * (Re)load the BE ban list from bans.txt
+         *
+         * @return bool             Whether sending the command was successful or not
+         */
+        public function load_bans()
+        {
+            return $this->send("loadBans");
+        }
+
+
+        /**
+         * Gets a list of all players currently on the server
+         *
+         * @return string|bool      The list of all players on the server or, if sending failed, false
+         */
+        public function get_players()
+        {
+            return $this->send("players") ? $this->get_answer() : false;
         }
 
 
         /**
          * Gets a list of all bans
          *
-         * @return string  The list of missions
+         * @return string|bool      The list of bans or, if sending failed, false
+         */
+        public function get_bans()
+        {
+            return $this->send("bans") ? $this->get_answer() : false;
+        }
+
+
+        /**
+         * Gets a list of all bans
+         *
+         * @return string|bool      The list of missions or, if sending failed, false
          */
         public function get_missions()
         {
-            $this->send("missions");
-            return $this->get_answer();
+            return $this->send("missions") ? $this->get_answer() : false;
         }
 
 
@@ -408,46 +405,51 @@ namespace Nizarii {
          * Ban a player's BE GUID from the server. If time is not specified or 0, the ban will be permanent;.
          * If reason is not specified the player will be kicked with the message "Banned".
          *
-         * @param string $player   Player who will be banned
-         * @param string $reason   Reason why the player is banned
-         * @param integer $time    How long the player is banned (0 = permanent)
+         * @param string $player    Player who will be banned
+         * @param string $reason    Reason why the player is banned
+         * @param integer $time     How long the player is banned (0 = permanent)
+         * @return bool             Whether sending the command was successful or not
          */
         public function ban_player($player, $reason = "Banned", $time = 0)
         {
-            $this->send("ban ".$player." ".$time." ".$reason);
+            return $this->send("ban ".$player." ".$time." ".$reason);
         }
 
 
         /**
          * Same as "ban_player", but allows to ban a player that is not currently on the server
          *
-         * @param string $player   Player who will be banned
-         * @param string $reason   Reason why the player is banned
-         * @param integer $time    How long the player is banned (0 = permanent)
+         * @param string $player    Player who will be banned
+         * @param string $reason    Reason why the player is banned
+         * @param integer $time     How long the player is banned (0 = permanent)
+         * @return bool             Whether sending the command was successful or not
          */
         public function add_ban($player, $reason = "Banned", $time = 0)
         {
-            $this->send("addBan ".$player." ".$time." ".$reason);
+            return $this->send("addBan ".$player." ".$time." ".$reason);
         }
 
 
         /**
          * Removes a ban
          *
-         * @param integer $banid  Ban who will be removed
+         * @param integer $banid    Ban who will be removed
+         * @return bool             Whether sending the command was successful or not
          */
         public function remove_ban($banid)
         {
-            $this->send("removeBan ".$banid);
+            return $this->send("removeBan ".$banid);
         }
 
 
         /**
          * Removes expired bans from bans file
+         *
+         * @return bool             Whether sending the command was successful or not
          */
         public function write_bans()
         {
-            $this->send("writeBans");
+            return $this->send("writeBans");
         }
     }
 
