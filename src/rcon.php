@@ -61,7 +61,7 @@ namespace Nizarii {
          * Socket
          *  The required socket for sending commands
          *
-         * @var object
+         * @var Socket
          */
         private $socket = null;
 
