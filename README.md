@@ -24,7 +24,7 @@ require_once '{PATH_TO_RCON.PHP}/rcon.php';
 <br>
 ## Examples
 #### Getting started
-After including `rcon.php` in your project, you need to create a new object, e.g:
+After including `rcon.php` in your project, you need to create a new object. It will automatically create a new connection to the server, so you don't need to call `connect()`, e.g.:
 ```php
 $rcon = new \Nizarii\ARC("Your server IP", Port, "RCon password");
 ```
@@ -37,7 +37,15 @@ ARC will throw Exceptions if anything goes wrong, so you could do a try-catch fu
 try 
 {
     $rcon = new \Nizarii\ARC("Your server IP", Port, "RCon password");
-    $rcon->say_player(0, "hey!");
+    
+    if ($rcon->say_player(0, "hey!"))  // say_player returns true/false, see functions list
+    {
+       echo "success!";
+    } 
+    else
+    {
+       echo "failed!";
+    }
 } 
 catch (Exception $e) 
 {
@@ -78,8 +86,8 @@ ARC features many functions to send BattlEye commands easier:
 * `add_ban(string $player, string $reason, int $time = 0)`:  Same as "ban_player", but allows to ban a player that is not currently on the server.*
 * `remove_ban(int $banid)`:  Removes a ban.*
 * `write_bans()`:  Removes expired bans from bans file.*
-* `disconnect()`:  Closes the connection to the BattlEye server manually, sending commands after calling this function is not possible.
-* `connect(string $ServerIP = "", int $ServerPort = "", string $RConPassword = "")`:  Creates a new connection to a server. Note: It's not required to call disconnect() before.
+* `disconnect()`:  Closes the existing connection to the BattlEye server manually, sending commands after calling this function is not possible.
+* `connect(string $ServerIP = "", int $ServerPort = "", string $RConPassword = "")`:  Creates a new connection to the server and closes the existing one. Note: It's not required to call disconnect() before.
 
 *These functions will return true if the execution was successful and false if it failed.
 <br>
