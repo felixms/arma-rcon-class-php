@@ -8,7 +8,7 @@
  * @since    September 26, 2015
  * @link     https://github.com/Nizarii/arma-rcon-php-class
  * @license  MIT-License
- * @version  1.3.1
+ * @version  1.3.2
  *
  */
 
@@ -93,7 +93,7 @@ namespace Nizarii {
          * @param string  $RCONpassword        RCon password required by BattlEye
          * @param array  $options              Options array of ARC
          */
-        public function __construct($serverIP, $serverPort = 2302, $RCONpassword ,array $options = array())
+        public function __construct($serverIP, $serverPort = 2302, $RCONpassword , array $options = array())
         {
             $this->serverIP = $serverIP;
             $this->serverPort = $serverPort;
@@ -120,14 +120,11 @@ namespace Nizarii {
          */
         private function authorize()
         {
-            $loginmsg = $this->get_loginmessage();
-            $sent = fwrite($this->socket, $loginmsg);
+            if(fwrite($this->socket, $this->get_loginmessage())) throw new PacketException('[ARC] Failed to send login!');
 
-            if($sent == false) throw new PacketException('[ARC] Failed to send login!');
+            $result = fread($this->socket, 16);
 
-            $res = fread($this->socket, 16);
-
-            if(ord($res[strlen($res)-1]) == 0) throw new AuthorizationException('[ARC] Login failed, wrong password!');
+            if(ord($result[strlen($result)-1]) == 0) throw new AuthorizationException('[ARC] Login failed, wrong password!');
         }
 
 
@@ -187,9 +184,7 @@ namespace Nizarii {
             $hb_msg = "BE".chr(hexdec("7d")).chr(hexdec("8f")).chr(hexdec("ef")).chr(hexdec("73"));
             $hb_msg .= chr(hexdec('ff')).chr(hexdec('02')).chr(hexdec('00'));
 
-            $sent = fwrite($this->socket, $hb_msg);
-
-            if ($sent == false) throw new PacketException('[ARC] Failed to send heartbeat packet!');
+            if (fwrite($this->socket, $hb_msg)) throw new PacketException('[ARC] Failed to send heartbeat packet!');
         }
 
 
@@ -214,11 +209,14 @@ namespace Nizarii {
         /**
          * The heart of this class - this function actually sends the RCON command
          *
-         * @param string $command   The command sent to the server
+         * @param $command string   The command sent to the server
          * @return bool             Whether sending the command was successful or not
+         * @throws \Exception       If the connection is closed
          */
         private function send($command)
         {
+            if ($this->disconnected) throw new \Exception('[ARC] Failed to send command, because the connection is closed!');
+
             $msgCRC = $this->get_msgCRC($command);
             $head = "BE".chr(hexdec($msgCRC[0])).chr(hexdec($msgCRC[1])).chr(hexdec($msgCRC[2])).chr(hexdec($msgCRC[3])).chr(hexdec('ff')).chr(hexdec('01')).chr(hexdec(sprintf('%01b', 0)));
             $msg = $head.$command;
@@ -250,13 +248,23 @@ namespace Nizarii {
 
         /**
          * Creates again a connection to the server, manually closing the
-         * connection before is not needed.
+         * connection before is not needed. You may change the server-related data by using the optional parameters
          *
-         * @see disconnect()
+         * @param string $ServerIP           New server IP, if not specified here, the IP from the constructor will be used
+         * @param string $ServerPort         New server port, if not specified here, the port from the constructor will be used
+         * @param string $RConPassword       New RCon password, if not specified here, the RCon password from the constructor will be used
+         *
+         * @throws AuthorizationException    If the password is wrong
+         * @throws PacketException           If sending the heartbeat packet fails
+         * @throws SocketException           If creating the socket fails
          */
-        public function connect()
+        public function connect($ServerIP = "", $ServerPort = "", $RConPassword ="")
         {
             if (!$this->disconnected) $this->disconnect();
+
+            if ($ServerIP != "") $this->serverIP = $ServerIP;
+            if ($ServerPort != "") $this->serverPort = $ServerPort;
+            if ($RConPassword != "") $this->RCONpassword = $RConPassword;
 
             $this->socket = fsockopen("udp://".$this->serverIP, $this->serverPort, $errno, $errstr, $this->options['timeout_seconds']);
 
