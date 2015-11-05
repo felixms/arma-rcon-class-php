@@ -8,7 +8,7 @@
  * @since    September 26, 2015
  * @link     https://github.com/Nizarii/arma-rcon-php-class
  * @license  MIT-License
- * @version  1.3.2
+ * @version  1.3.3
  *
  */
 
@@ -67,15 +67,6 @@ namespace Nizarii {
 
 
         /**
-         * Header
-         *  The header of a sent message
-         *
-         * @var string
-         */
-        private $header = null;
-
-
-        /**
          * Connection Status
          *  If this value is true, it means that the connection is closed,
          *  so connect() is available
@@ -120,11 +111,11 @@ namespace Nizarii {
          */
         private function authorize()
         {
-            if(fwrite($this->socket, $this->get_loginmessage())) throw new PacketException('[ARC] Failed to send login!');
+            if (fwrite($this->socket, $this->get_loginmessage()) === false) throw new PacketException('[ARC] Failed to send login!');
 
             $result = fread($this->socket, 16);
 
-            if(ord($result[strlen($result)-1]) == 0) throw new AuthorizationException('[ARC] Login failed, wrong password!');
+            if (ord($result[strlen($result)-1]) == 0) throw new AuthorizationException('[ARC] Login failed, wrong password!');
         }
 
 
@@ -184,7 +175,7 @@ namespace Nizarii {
             $hb_msg = "BE".chr(hexdec("7d")).chr(hexdec("8f")).chr(hexdec("ef")).chr(hexdec("73"));
             $hb_msg .= chr(hexdec('ff')).chr(hexdec('02')).chr(hexdec('00'));
 
-            if (fwrite($this->socket, $hb_msg)) throw new PacketException('[ARC] Failed to send heartbeat packet!');
+            if (fwrite($this->socket, $hb_msg) === false) throw new PacketException('[ARC] Failed to send heartbeat packet!');
         }
 
 
@@ -195,11 +186,11 @@ namespace Nizarii {
          */
         private function get_answer()
         {
-            $answer = substr(fread($this->socket, 102400), strlen($this->header));
+            $answer = substr(fread($this->socket, 102400), 9);
 
             while (strpos($answer,'RCon admin') !== false)
             {
-                $answer = substr(fread($this->socket, 102400), strlen($this->header));
+                $answer = substr(fread($this->socket, 102400), 9);
             }
 
             return $answer;
@@ -221,9 +212,7 @@ namespace Nizarii {
             $head = "BE".chr(hexdec($msgCRC[0])).chr(hexdec($msgCRC[1])).chr(hexdec($msgCRC[2])).chr(hexdec($msgCRC[3])).chr(hexdec('ff')).chr(hexdec('01')).chr(hexdec(sprintf('%01b', 0)));
             $msg = $head.$command;
 
-            $this->header = $head;
-
-            return fwrite($this->socket, $msg) == false ? false : true;
+            return fwrite($this->socket, $msg) === false ? false : true;
         }
 
 
@@ -258,7 +247,7 @@ namespace Nizarii {
          * @throws PacketException           If sending the heartbeat packet fails
          * @throws SocketException           If creating the socket fails
          */
-        public function connect($ServerIP = "", $ServerPort = "", $RConPassword ="")
+        public function connect($ServerIP = "", $ServerPort = "", $RConPassword = "")
         {
             if (!$this->disconnected) $this->disconnect();
 
@@ -266,7 +255,7 @@ namespace Nizarii {
             if ($ServerPort != "") $this->serverPort = $ServerPort;
             if ($RConPassword != "") $this->RCONpassword = $RConPassword;
 
-            $this->socket = fsockopen("udp://".$this->serverIP, $this->serverPort, $errno, $errstr, $this->options['timeout_seconds']);
+            $this->socket = @fsockopen("udp://".$this->serverIP, $this->serverPort, $errno, $errstr, $this->options['timeout_seconds']);
 
             stream_set_timeout($this->socket, $this->options['timeout_seconds']);
             stream_set_blocking($this->socket, true);
