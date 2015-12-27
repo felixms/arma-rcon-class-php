@@ -111,11 +111,11 @@ namespace Nizarii {
          */
         private function authorize()
         {
-            if (fwrite($this->socket, $this->get_loginmessage()) === false) throw new PacketException('[ARC] Failed to send login!');
+            if ( fwrite($this->socket, $this->get_loginmessage()) === false ) throw new PacketException('[ARC] Failed to send login!');
 
             $result = fread($this->socket, 16);
 
-            if (ord($result[strlen($result)-1]) == 0) throw new AuthorizationException('[ARC] Login failed, wrong password!');
+            if ( ord($result[strlen($result)-1]) == 0 ) throw new AuthorizationException('[ARC] Login failed, wrong password!');
         }
 
 
@@ -141,7 +141,6 @@ namespace Nizarii {
          */
         private function get_msgCRC($command)
         {
-
             $msgCRC = sprintf("%x", crc32(chr(255).chr(01).chr(hexdec(sprintf('%01b', 0))).$command));
             $msgCRC = array(substr($msgCRC,-2,2),substr($msgCRC,-4,2),substr($msgCRC,-6,2),substr($msgCRC,0,2));
 
@@ -175,7 +174,7 @@ namespace Nizarii {
             $hb_msg = "BE".chr(hexdec("7d")).chr(hexdec("8f")).chr(hexdec("ef")).chr(hexdec("73"));
             $hb_msg .= chr(hexdec('ff')).chr(hexdec('02')).chr(hexdec('00'));
 
-            if (fwrite($this->socket, $hb_msg) === false) throw new PacketException('[ARC] Failed to send heartbeat packet!');
+            if ( fwrite($this->socket, $hb_msg) === false ) throw new PacketException('[ARC] Failed to send heartbeat packet!');
         }
 
 
@@ -186,12 +185,9 @@ namespace Nizarii {
          */
         private function get_answer()
         {
-            $answer = substr(fread($this->socket, 102400), 9);
+            $answer = substr(fread($this->socket, 6553600), 9);
 
-            while (strpos($answer,'RCon admin') !== false)
-            {
-                $answer = substr(fread($this->socket, 102400), 9);
-            }
+            while ( strpos($answer,'RCon admin') !== false ) $answer = substr(fread($this->socket, 6553600), 9);
 
             return $answer;
         }
@@ -206,7 +202,7 @@ namespace Nizarii {
          */
         private function send($command)
         {
-            if ($this->disconnected) throw new \Exception('[ARC] Failed to send command, because the connection is closed!');
+            if ( $this->disconnected ) throw new \Exception('[ARC] Failed to send command, because the connection is closed!');
 
             $msgCRC = $this->get_msgCRC($command);
             $head = "BE".chr(hexdec($msgCRC[0])).chr(hexdec($msgCRC[1])).chr(hexdec($msgCRC[2])).chr(hexdec($msgCRC[3])).chr(hexdec('ff')).chr(hexdec('01')).chr(hexdec(sprintf('%01b', 0)));
@@ -224,7 +220,7 @@ namespace Nizarii {
          */
         public function disconnect()
         {
-            if ($this->disconnected) return;
+            if ( $this->disconnected ) return;
 
             $this->send("Exit");
 
@@ -249,22 +245,22 @@ namespace Nizarii {
          */
         public function connect($ServerIP = "", $ServerPort = "", $RConPassword = "")
         {
-            if (!$this->disconnected) $this->disconnect();
+            if ( !$this->disconnected) $this->disconnect();
 
-            if ($ServerIP != "") $this->serverIP = $ServerIP;
-            if ($ServerPort != "") $this->serverPort = $ServerPort;
-            if ($RConPassword != "") $this->RCONpassword = $RConPassword;
+            if ( $ServerIP != "" ) $this->serverIP = $ServerIP;
+            if ( $ServerPort != "" ) $this->serverPort = $ServerPort;
+            if ( $RConPassword != "" ) $this->RCONpassword = $RConPassword;
 
             $this->socket = @fsockopen("udp://".$this->serverIP, $this->serverPort, $errno, $errstr, $this->options['timeout_seconds']);
 
             stream_set_timeout($this->socket, $this->options['timeout_seconds']);
             stream_set_blocking($this->socket, true);
 
-            if(!$this->socket) throw new SocketException('[ARC] Failed to create socket!');
+            if ( !$this->socket ) throw new SocketException('[ARC] Failed to create socket!');
 
             $this->authorize();
 
-            if ($this->options['send_heartbeat']) $this->send_heartbeat();
+            if ( $this->options['send_heartbeat'] ) $this->send_heartbeat();
 
             $this->disconnected = false;
         }
