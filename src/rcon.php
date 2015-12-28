@@ -185,11 +185,16 @@ namespace Nizarii {
          */
         private function get_answer()
         {
-            $answer = substr(fread($this->socket, 6553600), 9);
+            $get = function() { return substr(fread($this->socket, 102400), strlen($this->head)); };
+            $output = '';
 
-            while ( strpos($answer,'RCon admin') !== false ) $answer = substr(fread($this->socket, 6553600), 9);
+            do {
+                $answer = $get();
+                while ( strpos($answer,'RCon admin') !== false ) $answer = $get();
+                $output .= $answer;
+            } while ( $answer != '' );
 
-            return $answer;
+            return $output;
         }
 
 
