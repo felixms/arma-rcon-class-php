@@ -18,12 +18,6 @@ Please consider that mods normally don't change the BattlEye server settings, so
 ARC only requires **PHP 5.3**, nothing more!
 <br>
 <br>
-## Installation
-To use ARC in your project, just inlcude `rcon.php` in your project.
-```php
-require_once '{PATH_TO_RCON.PHP}/rcon.php';
-```
-<br>
 ## Examples
 #### Getting started
 After including `rcon.php` in your project, you need to create a new object. It will automatically create a new connection to the server, so you don't need to call `connect()`, e.g.:
