@@ -1,5 +1,5 @@
 {
-  "name": "nizarii/ArmaRConClass",
+  "name": "nizarii/arma-rcon-class",
   "homepage": "https://github.com/Nizarii/arma-rcon-class-php/",
   "type": "library",
   "description": "A lightweight class to send commands to Arma (also DayZ SA) servers via RCon",
