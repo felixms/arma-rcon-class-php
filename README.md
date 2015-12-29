@@ -18,11 +18,26 @@ Please consider that mods normally don't change the BattlEye server settings, so
 ARC only requires **PHP 5.3**, nothing more!
 <br>
 <br>
+## Installation 
+#### Via Composer
+If you haven't already, download Composer
+```shell
+$ curl -s http://getcomposer.org/installer | php
+```
+Now require and install ARC
+```shell
+$ composer require nizarii/arma-rcon-class
+$ php composer.phar install
+```
+#### Without Composer
+Just include ARC in your project: `require_once 'ArmaRConClass/rcon.php';` 
+<br>
+<br>
 ## Examples
 #### Getting started
 After including `rcon.php` in your project, you need to create a new object. It will automatically create a new connection to the server, so you don't need to call `connect()`, e.g.:
 ```php
-$rcon = new \Nizarii\ARC("Your server IP", Port, "RCon password");
+$rcon = new \Nizarii\ArmaRConClass\ARC("Your server IP", Port, "RCon password");
 ```
 Then you are able to send commands with the `command()` function:
 ```php
