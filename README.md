@@ -1,4 +1,5 @@
 # Arma RCon Class for PHP (ARC)
+[![Packagist Version](https://img.shields.io/packagist/v/nizarii/arma-rcon-class.svg)](https://packagist.org/packages/nizarii/arma-rcon-class)
 
 ARC is a lightweight PHP class, which let's you easily send commands via  RCon to your Arma server. See "Supported Server" for a full list of supported Arma games.
 <br>
@@ -15,7 +16,7 @@ Please consider that mods normally don't change the BattlEye server settings, so
 *RCon is only usable on Privates Hives of DayZ SA Servers (thanks to JaG-v2)
 <br>
 ## Requirements
-ARC only requires **PHP 5.3**, nothing more!
+ARC requires **PHP 5.3** or higher, nothing more!
 <br>
 <br>
 ## Installation 
@@ -86,7 +87,7 @@ ARC features many functions to send BattlEye commands easier:
 * `get_players()`:  Returns a list of all players online. Note: Returns false if sending failed.
 * `get_missions()`:  Returns a list of the available missions on the server. Note: Returns false if sending failed.
 * `get_bans()`:  Returns a list of all BE server bans. Note: Returns false if sending failed.
-* `kick_player(int $player, straing $reason = 'Admin Kick')`:  Kicks a player who is currently on the server. *
+* `kick_player(int $player, string $reason = 'Admin Kick')`:  Kicks a player who is currently on the server. *
 * `say_global(string $message)`:  Sends a global message to all players.*
 * `say_player(int $player, string $message)`:  Sends a message to a specific player.*
 * `load_scripts()`:  Loads the "scripts.txt" file without the need to restart the server.*
