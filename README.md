@@ -12,7 +12,7 @@ Please consider that mods normally don't change the BattlEye server settings, so
 |------         | DayZ Standalone*        | :white_check_mark: |
 |33935          | Arma 2: Operation Arrowhead       | :white_check_mark: |
 |33905          | Arma 2        | :white_check_mark: |
-*RCon is only usable on Privates Hives of DayZ SA Servers (thanks to JaG-v2)
+<br>
 <br>
 ## Requirements
 ARC requires **PHP 5.3** or higher, nothing more!
@@ -43,7 +43,8 @@ Creating multiple connections with one ARC object
 $server1 = $rcon->connect("Your server IP 1", Port1, "RCon password 1");
 $server2 = $rcon->connect("Your server IP 2", Port2, "RCon password 2");
 
-$server1 = $rcon->disconnect();
+$server1->disconnect();
+$server2->disconnect();
 ```
 Two new helpful functions 
 ```php
@@ -59,9 +60,9 @@ $server2
     
 ```
 #### Options
-Currently `timeout_sec` is the only option, more will be added in future versions.
+Currently `timeout_seconds` is the only option, more will be added in future versions.
 ```php
-$rcon = new \Nizarii\ArmaRConClass\ARC(['timeout_sec' => 1]); // 'timeout_sec' is by default 1
+$rcon = new \Nizarii\ArmaRConClass\ARC(['timeout_seconds' => 1]); // 'timeout_seconds' is by default 1
 ```
 *Sending a heartbeat packet is not possible anymore in version 2.0.*
 <br>

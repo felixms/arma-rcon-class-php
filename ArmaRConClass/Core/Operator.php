@@ -3,6 +3,11 @@
 namespace Nizarii\ArmaRConClass\Core;
 
 
+/**
+ * Class Operator
+ *
+ * @internal
+ */
 class Operator extends Sender {
 
 
@@ -15,7 +20,7 @@ class Operator extends Sender {
     public function __construct(Connection $connection) {
         parent::__construct($connection);
     }
-
+    
     
     /**
      * Sends a custom command to the BattlEye server

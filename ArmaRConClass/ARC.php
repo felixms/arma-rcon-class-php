@@ -15,10 +15,19 @@ use Nizarii\ArmaRConClass\Core\Connection;
  * @license  MIT-License
  * @version  2.0
  */
-class ARC extends Connection {
+class ARC {
+
+
+    private $options = array();
     
 
     public function __construct(array $options = array()) {
         $this->options = array_merge($this->options, $options);
+    }
+
+
+    public function connect($ServerIP, $ServerPort, $Password) {
+        $connection = new Connection($this->options);
+        return $connection->create($ServerIP, $ServerPort, $Password);
     }
 }

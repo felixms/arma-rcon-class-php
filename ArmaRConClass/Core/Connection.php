@@ -10,6 +10,7 @@ use Nizarii\ArmaRConClass\Exceptions\SocketException;
  * Class Connection
  *
  * Sorry, I am busy atm, description will follow ;)
+ * @internal
  */
 class Connection {
 
@@ -20,8 +21,9 @@ class Connection {
      *
      * @var array
      */
-    protected $options = [
-        'timeout_sec'      => 1
+    public $options = [
+        'timeout_seconds'  => 1,
+        'throw_exceptions' => true
     ];
 
 
@@ -36,7 +38,6 @@ class Connection {
      *  The required socket for sending commands
      *
      * @var resource
-     * @internal
      */
     public $socket = null;
 
@@ -49,22 +50,14 @@ class Connection {
      */
     private $password;
 
-
     
-    /**
-     * @param $ServerIP
-     * @param $ServerPort
-     * @param $Password
-     *
-     * @return Operator
-     * @throws AuthorizationException
-     * @throws PacketException
-     * @throws SocketException
-     */
-    public function connnect($ServerIP, $ServerPort, $Password) {
-        if ( !$this->disconnected)
-            $this->disconnect();
+    
+    public function __construct(array $options) {
+        $this->options = array_merge($this->options, $options);
+    }
 
+
+    public function create($ServerIP, $ServerPort, $Password) {
         $this->password = $Password;
 
         $this->socket = @fsockopen('udp://' . $ServerIP, $ServerPort, $errno, $errstr, $this->options['timeout_sec']);
@@ -72,30 +65,14 @@ class Connection {
         stream_set_timeout($this->socket, $this->options['timeout_sec']);
         stream_set_blocking($this->socket, true);
 
-        if ( !$this->socket ) 
+        if ( !$this->socket )
             throw new SocketException('[ARC] Failed to create socket!');
 
         $this->authorize();
 
         $this->disconnected = false;
-        
+
         return new Operator($this);
-    }
-
-
-    /**
-     * Closes the socket/connection. If you want to reconnect,
-     * don't forget to call connect(), in order to create a new socket
-     *
-     * @see connect()
-     */
-    public function disconnect() {
-        if ( $this->disconnected ) return;
-
-        fclose($this->socket);
-
-        $this->connection = null;
-        $this->disconnected = true;
     }
     
 

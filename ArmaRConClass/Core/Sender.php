@@ -3,7 +3,11 @@
 namespace Nizarii\ArmaRConClass\Core;
 
 
-
+/**
+ * Class Sender
+ *
+ * @internal
+ */
 class Sender {
     
     
@@ -13,12 +17,37 @@ class Sender {
     private $head;
     
     
+    private $disconnected = false;
+    
+
+
     public function __construct(Connection $connection) {
         $this->connection = $connection;
+    }
+    
+
+    /**
+     * Closes the socket/connection. If you want to reconnect,
+     * don't forget to call connect(), in order to create a new socket
+     *
+     * @see connect()
+     */
+    public function disconnect() {
+        if ( $this->disconnected )
+            return;
+        
+        $this->send('Exit');
+        fclose($this->connection->socket);
+
+        $this->connection = null;
+        $this->disconnected = true;
     }
 
 
     protected function send($command) {
+        if ( $this->disconnected )
+            return false;
+        
         $msgCRC = $this->getMsgCRC($command);
         $head = "BE".chr(hexdec($msgCRC[0])).chr(hexdec($msgCRC[1])).chr(hexdec($msgCRC[2])).chr(hexdec($msgCRC[3])).chr(hexdec('ff')).chr(hexdec('01')).chr(hexdec(sprintf('%01b', 0)));
 
