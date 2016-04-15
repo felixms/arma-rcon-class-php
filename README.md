@@ -3,8 +3,6 @@
 ARC allows you connecting and sending commands easily via RCon to your ARMA game server. See "Supported Servers" for a list of supported games.
 <br>
 ### ATTENTION: This version is currently in testing, do not use this in production!
-
-<br>
 <br>
 ## Supported Servers
 Please consider that mods normally don't change the BattlEye server settings, so this class also works for sending RCON commands  to servers running mods (e.g Altis Life, DayZ, Epoch etc.).
@@ -40,14 +38,19 @@ Just include the bootstrapper: `require_once 'ArmaRConClass/bootstrap.php';`
 #### New in 2.0
 ```php
 $rcon = new \Nizarii\ArmaRConClass\ARC(['timeout_sec' => 1]); // 'timeout_sec' is by default 1
-
-// Create multiple connections with one ARC object
-$server1 = $rcon->connnect("Your server IP 1", Port1, "RCon password 1");
-$server2 = $rcon->connnect("Your server IP 2", Port2, "RCon password 2");
-
-$result = $server2->command("Say -1 hello!");
-
-// Only possible with functions that don't return an answer from the server
+```
+Creating multiple connections with one ARC object
+```php
+$server1 = $rcon->connect("Your server IP 1", Port1, "RCon password 1");
+$server2 = $rcon->connect("Your server IP 2", Port2, "RCon password 2");
+```
+Two new helpful functions 
+```php
+$players = $server1->getPlayersArray();
+$players = $server1->getBansArray();
+```
+Only possible with functions that don't return an answer from the server
+```php
 $server2
     ->sayGlobal('hello!')
     ->loadScripts()
