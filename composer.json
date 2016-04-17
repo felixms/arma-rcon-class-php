@@ -4,7 +4,7 @@
   "type": "library",
   "description": "ARC allows you connecting and sending commands easily via RCon to your ARMA game server",
   "require": {
-    "php": ">=5.3.0"
+    "php": ">=5.4.0"
   },
   "license": "MIT",
   "support": {
