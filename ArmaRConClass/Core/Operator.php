@@ -182,22 +182,9 @@ class Operator extends Sender {
         if ( $playersRaw === false )
             return false;
 
-        $players = preg_replace("/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/", "", $playersRaw );
-
+        $players = $this->cleanList($playersRaw);
         preg_match_all("#(\d+)\s+(\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+\b)\s+(\d+)\s+([0-9a-fA-F]+)\(\w+\)\s([\S ]+)$#im", $players, $str);
-
-        // Remove first array
-        array_shift($str);
-
-        // Create return array
-        $result = array();
-
-        // Loop true the main arrays, each holding a value
-        foreach ($str as $key => $value) {
-            // Combine's each main vaule in to new array
-            foreach ( $value as $keyLine => $line )
-                $result[$keyLine][$key] = $line;
-        }
+        $result = $this->formatList($str);
 
         return $result;
     }
@@ -228,23 +215,10 @@ class Operator extends Sender {
         if ( $bansRaw === false )
             return false;
 
-        $bans = preg_replace("/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/", "", $bansRaw );
-
+        $bans = $this->cleanList($bansRaw);
         preg_match_all("#(\d+)\s+(\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+\b)\s+(\d+)\s+([0-9a-fA-F]+)\(\w+\)\s([\S ]+)$#im", $bans, $str);
-
-        // Remove first array
-        array_shift($str);
-
-        // Create return array
-        $result = array();
-
-        // Loop true the main arrays, each holding a value
-        foreach ( $str as $key => $value ) {
-            // Combine's each main vaule in to new array
-            foreach ( $value as $keyLine => $line )
-                $result[$keyLine][$key] = $line;
-        }
-
+        $result = $this->formatList($str);
+        
         return $result;
     }
 
@@ -257,5 +231,42 @@ class Operator extends Sender {
     public function getMissions() {
         return $this->send("missions") ? $this->getAnswer() : false;
     }
+    
+     /**
+     * Converts BE text "array" list to Array
+     *
+     * @author nerdalertdk (https://github.com/nerdalertdk)
+     * @link https://github.com/Nizarii/arma-rcon-class-php/issues/4
+     * @return array
+     */
+    private function formatList($str)
+	{
+		// Remove first array
+		array_shift($str);
+		// Create return array
+		$result = array();
+		// Loop true the main arrays, each holding a value
+		foreach($str as $key => $value)
+		{
+			// Combine's each main vaule in to new array
+			foreach($value as $keyLine => $line)
+			{
+				$result[$keyLine][$key] = trim($line);
+			}
+		}
+		return $result;
+	}
+    
+    /**
+     * Remove control characters 
+     *
+     * @author nerdalertdk (https://github.com/nerdalertdk)
+     * @link https://github.com/Nizarii/arma-rcon-class-php/issues/4
+     * @return string
+     */
+	private function cleanList($str)
+	{
+		return preg_replace('/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/', '', $str );
+	}
 }
 
