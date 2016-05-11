@@ -2,14 +2,11 @@
   "name": "nizarii/arma-rcon-class",
   "homepage": "https://github.com/Nizarii/arma-rcon-class-php/",
   "type": "library",
-  "description": "A lightweight class to send commands to Arma (also DayZ SA) servers via RCon",
+  "description": "ARC allows you connecting and sending commands easily via RCon to your ARMA game server",
   "require": {
     "php": ">=5.3.0"
   },
   "license": "MIT",
-  "support": {
-    "email": "nizari@starwolf-dev.com"
-  },
   "authors": [
     {
       "name": "Felix Schäfer",
@@ -17,19 +14,19 @@
       "role": "Developer"
     }
   ],
-  "keywords":
-  [
+  "keywords": [
     "rcon",
     "arma3",
     "arma2",
     "dayz",
     "lightweight",
     "altislife",
-    "operation arrowhead"
+    "operation arrowhead",
+    "class"
   ],
   "autoload": {
-    "psr-4": {
-      "Nizarii\\ArmaRConClass\\": "ArmaRConClass/"
-    }
+    "files": [
+      "rcon.php"
+    ]
   }
 }
