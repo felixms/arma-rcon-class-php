@@ -54,7 +54,7 @@ try
     else
        echo "failed!";
        
-    $array = $rcon->   
+    $array = $rcon->getPlayersArray;
 } 
 catch (Exception $e) 
 {
