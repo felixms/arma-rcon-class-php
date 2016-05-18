@@ -400,7 +400,7 @@ class ARC {
      * @return array|bool      The list of all players on the server or, if sending failed, false
      */
     public function getPlayersArray() {
-        $playersRaw = $this->send("players");
+        $playersRaw = $this->getPlayers();
 
         if ( $playersRaw === false )
             return false;
@@ -473,7 +473,7 @@ class ARC {
      * @return array|bool      The list of bans or, if sending failed, false
      */
     public function getBansArray() {
-        $bansRaw = $this->send("bans");
+        $bansRaw = $this->getBans();
 
         if ( $bansRaw === false )
             return false;
