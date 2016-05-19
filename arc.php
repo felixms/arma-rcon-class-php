@@ -289,9 +289,13 @@ class ARC {
      *
      * @param string $command   Command sent to the server
      * @return string           Answer from the server
+     * @throws \Exception       If wrong parameter types are passed to the function
      */
     public function command($command)
     {
+        if ( !is_string($command) )
+            throw new \Exception('[ARC] Wrong parameter type!');
+
         return $this->send($command) ? $this->getAnswer() : false;
     }
 
@@ -306,6 +310,9 @@ class ARC {
      */
     public function kickPlayer($player, $reason = 'Admin Kick')
     {
+        if ( !is_int($player) || !is_string($reason) )
+            throw new \Exception('[ARC] Wrong parameter type!');
+
         return $this->send("kick $player $reason");
     }
 
@@ -315,9 +322,13 @@ class ARC {
      *
      * @param string $message   The message to send
      * @return bool             Whether sending the command was successful or not
+     * @throws \Exception       If wrong parameter types are passed to the function
      */
     public function sayGlobal($message)
     {
+        if ( !is_string($message) )
+            throw new \Exception('[ARC] Wrong parameter type!');
+
         return $this->send("Say -1 ".$message);
     }
 
@@ -328,9 +339,13 @@ class ARC {
      * @param integer $player   Player who is sent the message
      * @param string $message   The message for the player
      * @return bool             Whether sending the command was successful or not
+     * @throws \Exception       If wrong parameter types are passed to the function
      */
     public function sayPlayer($player, $message)
     {
+        if ( !is_int($player) || !is_string($message) )
+            throw new \Exception('[ARC] Wrong parameter type!');
+
         return $this->send("Say $player $message");
     }
 
@@ -351,9 +366,13 @@ class ARC {
      *
      * @param integer $ping     Max ping
      * @return bool             Whether sending the command was successful or not
+     * @throws \Exception       If wrong parameter types are passed to the function
      */
     public function maxPing($ping)
     {
+        if ( !is_int($ping) )
+            throw new \Exception('[ARC] Wrong parameter type!');
+
         return $this->send("MaxPing $ping");
     }
 
@@ -363,9 +382,13 @@ class ARC {
      *
      * @param string $password  The new password
      * @return bool             Whether sending the command was successful or not
+     * @throws \Exception       If wrong parameter types are passed to the function
      */
     public function changePassword($password)
     {
+        if ( !is_string($password) )
+            throw new \Exception('[ARC] Wrong parameter type!');
+
         return $this->send("RConPassword $password");
     }
 
@@ -399,7 +422,8 @@ class ARC {
      * @link https://github.com/Nizarii/arma-rcon-class-php/issues/4
      * @return array|bool      The list of all players on the server or, if sending failed, false
      */
-    public function getPlayersArray() {
+    public function getPlayersArray()
+    {
         $playersRaw = $this->getPlayers();
 
         if ( $playersRaw === false )
@@ -432,9 +456,13 @@ class ARC {
      * @param string $reason    Reason why the player is banned
      * @param integer $time     How long the player is banned (0 = permanent)
      * @return bool             Whether sending the command was successful or not
+     * @throws \Exception       If wrong parameter types are passed to the function
      */
     public function banPlayer($player, $reason = "Banned", $time = 0)
     {
+        if ( !is_int($player) || !is_string($reason) || !is_int($time) )
+            throw new \Exception('[ARC] Wrong parameter type!');
+
         return $this->send("ban $player $time $reason");
     }
 
@@ -446,9 +474,13 @@ class ARC {
      * @param string $reason    Reason why the player is banned
      * @param integer $time     How long the player is banned (0 = permanent)
      * @return bool             Whether sending the command was successful or not
+     * @throws \Exception       If wrong parameter types are passed to the function
      */
     public function addBan($player, $reason = "Banned", $time = 0)
     {
+        if ( !is_int($player) || !is_string($reason) || !is_int($time) )
+            throw new \Exception('[ARC] Wrong parameter type!');
+
         return $this->send("addBan $player $time $reason");
     }
 
@@ -466,12 +498,13 @@ class ARC {
 
 
     /**
-     * Gets aan array of all bans
+     * Gets an array of all bans
      *
      * @author nerdalertdk (https://github.com/nerdalertdk)
      * @link https://github.com/Nizarii/arma-rcon-class-php/issues/4
      * @return array|bool      The list of bans or, if sending failed, false
      */
+     /* @see https://github.com/Nizarii/arma-rcon-class-php/issues/11
     public function getBansArray() {
         $bansRaw = $this->getBans();
 
@@ -484,7 +517,7 @@ class ARC {
 
         return $result;
     }
-
+   */
 
     /**
      * Gets a list of all bans
