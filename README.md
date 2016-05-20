@@ -83,7 +83,8 @@ ARC features many functions to send BattlEye commands easier. After creating a n
 * `getPlayers()`:  Returns a list of all players online.
 * `getPlayersArray()`:  Returns an array of all players online.
 * `getMissions()`:  Returns a list of the available missions on the server.
-* `getBans()`:  Returns a list of all BE server bans. 
+* `getBans()`:  Returns a list of all BE server bans.
+* `getBansArray()`:  Returns an array of all server bans. 
 * `kickPlayer(int $player, string $reason = 'Admin Kick')`:  Kicks a player who is currently on the server. 
 * `sayGlobal(string $message)`:  Sends a global message to all players.
 * `sayPlayer(int $player, string $message)`:  Sends a message to a specific player.
