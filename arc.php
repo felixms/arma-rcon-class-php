@@ -98,11 +98,17 @@ class ARC {
     {
         if ( !is_int($serverPort) || !is_string($RCONpassword) || !is_string($serverIP) )
             throw new \Exception('[ARC] Wrong parameter type!');
-            
+
         $this->serverIP = $serverIP;
         $this->serverPort = $serverPort;
         $this->RCONpassword = $RCONpassword;
         $this->options = array_merge($this->options, $options);
+
+        if ( !is_int($this->options['timeout_sec']) )
+            throw new \Exception('[ARC] Wrong option type, \'timeout_sec\' must be an integer');
+
+        if ( !is_bool($this->options['heartbeat']) )
+            throw new \Exception('[ARC] Wrong option type, \'heartbeat\' must be a boolean');
 
         $this->connect();
     }
@@ -173,7 +179,7 @@ class ARC {
             $this->close();
 
         $this->connect();
-        
+
         return $this;
     }
 
@@ -617,10 +623,10 @@ class ARC {
     {
         // Remove first array
         array_shift($str);
-        
+
         // Create return array
         $result = array();
-        
+
         // Loop true the main arrays, each holding a value
         foreach($str as $key => $value)
         {
@@ -630,7 +636,7 @@ class ARC {
                 $result[$keyLine][$key] = trim($line);
             }
         }
-        
+
         return $result;
     }
 

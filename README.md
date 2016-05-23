@@ -68,15 +68,15 @@ catch (Exception $e)
 #### Options
 ARC can send a heartbeat packet to the server. In order to do this, you need to enable it:
 ```php
-$rcon = new \Nizarii\ARC("Your server IP", Port, "RCon password", array (
-        'heartbeat' => true,
-    ));
+$rcon = new \Nizarii\ARC("Your server IP", Port, "RCon password", [
+    'heartbeat' => true, // must be a boolean
+]);
 ```
 Another option is `timeout_seconds`, which sets a timeout value on the connection:
 ```php
-$rcon = new \Nizarii\ARC("Your server IP", Port, "RCon password", array (
-        'timeout_sec'      => 1, // by default 1 second
-    ));
+$rcon = new \Nizarii\ARC("Your server IP", Port, "RCon password", [
+    'timeout_sec'      => 1, // must be an integer, by default 1 second
+]);
     
 $rcon->writeBans(); 
 ```
