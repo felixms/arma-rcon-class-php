@@ -8,7 +8,7 @@
  * @since    September 26, 2015
  * @link     https://github.com/Nizarii/arma-rcon-php-class
  * @license  MIT-License
- * @version  2.0
+ * @version  2.1
  *
  */
 
@@ -92,9 +92,13 @@ class ARC {
      * @param integer $serverPort          Port of the Arma server
      * @param string  $RCONpassword        RCon password required by BattlEye
      * @param array  $options              Options array of ARC
+     * @throws \Exception                  If wrong parameter types are passed to the function
      */
-    public function __construct($serverIP, $serverPort = 2302, $RCONpassword , array $options = array())
+    public function __construct($serverIP, $RCONpassword, $serverPort = 2302, array $options = array())
     {
+        if ( !is_int($serverPort) || !is_string($RCONpassword) || !is_string($serverIP) )
+            throw new \Exception('[ARC] Wrong parameter type!');
+            
         $this->serverIP = $serverIP;
         $this->serverPort = $serverPort;
         $this->RCONpassword = $RCONpassword;
@@ -114,9 +118,68 @@ class ARC {
 
 
     /**
+     * Closes the socket/connection
+     */
+    public function close()
+    {
+        if ( $this->disconnected )
+            return;
+
+        fclose($this->socket);
+
+        $this->socket = null;
+        $this->disconnected = true;
+    }
+
+
+    /**
+     * Creates again a connection to the server, manually closing the
+     * connection before is not needed. You may change the server-related data by using the optional parameters
+     *
+     * @throws \Exception       If the password is wrong
+     * @throws \Exception       If sending the heartbeat packet fails
+     * @throws \Exception       If creating the socket fails
+     */
+    private function connect()
+    {
+        if ( !$this->disconnected)
+            $this->close();
+
+        $this->socket = @fsockopen("udp://$this->serverIP", $this->serverPort, $errno, $errstr, $this->options['timeout_sec']);
+
+        if ( !$this->socket )
+            throw new \Exception('[ARC] Failed to create socket!');
+
+        stream_set_timeout($this->socket, $this->options['timeout_sec']);
+        stream_set_blocking($this->socket, true);
+
+        $this->authorize();
+
+        $this->disconnected = false;
+
+        if ( $this->options['heartbeat'] )
+            $this->sendHeartbeat();
+    }
+
+
+    /**
+     * Closes the current connection and creates a new one
+     *
+     * @throws \Exception If    creating a new connection fails
+     */
+    public function reconnect()
+    {
+        if ( !$this->disconnected )
+            $this->close();
+
+        $this->connect();
+    }
+
+
+    /**
      * Sends the login data to the server in order to send commands later
      *
-     * @throws \Exception      If login fails (password wrong)
+     * @throws \Exception       If login fails (password wrong)
      */
     private function authorize()
     {
@@ -125,8 +188,57 @@ class ARC {
 
         $result = fread($this->socket, 16);
 
-        if ( ord($result[strlen($result)-1]) == 0 )
-            throw new \Exception('[ARC] Login failed, wrong password!');
+        if ( @ord($result[strlen($result)-1]) == 0 )
+            throw new \Exception('[ARC] Login failed, wrong password or wrong port!');
+    }
+
+
+    /**
+     * Receives the answer form the server
+     *
+     * @return string           Any answer from the server, except the log-in message
+     */
+    private function getAnswer()
+    {
+        $get = function() {
+            return substr(fread($this->socket, 102400), strlen($this->head));
+        };
+
+        $output = '';
+
+        do {
+            $answer = $get();
+
+            while ( strpos($answer,'RCon admin') !== false )
+                $answer = $get();
+
+            $output .= $answer;
+        } while ( $answer != '' );
+
+        return $output;
+    }
+
+
+    /**
+     * The heart of this class - this function actually sends the RCON command
+     *
+     * @param $command string   The command sent to the server
+     * @return bool             Whether sending the command was successful or not
+     * @throws \Exception       If the connection is closed
+     * @throws \Exception       If sending the command failed
+     */
+    private function send($command)
+    {
+        if ( $this->disconnected )
+            throw new \Exception('[ARC] Failed to send command, because the connection is closed!');
+
+        $msgCRC = $this->getMsgCRC($command);
+        $head = "BE".chr(hexdec($msgCRC[0])).chr(hexdec($msgCRC[1])).chr(hexdec($msgCRC[2])).chr(hexdec($msgCRC[3])).chr(hexdec('ff')).chr(hexdec('01')).chr(hexdec(sprintf('%01b', 0)));
+        $msg = $head.$command;
+        $this->head = $head;
+
+        if ( fwrite($this->socket, $msg) === false )
+            throw new \Exception("[ARC] Failed to send command '$command'");
     }
 
 
@@ -191,112 +303,20 @@ class ARC {
 
 
     /**
-     * Receives the answer form the server
-     *
-     * @return string           Any answer from the server, except the log-in message
-     */
-    private function getAnswer()
-    {
-        $get = function() {
-            return substr(fread($this->socket, 102400), strlen($this->head));
-        };
-
-        $output = '';
-
-        do {
-            $answer = $get();
-
-            while ( strpos($answer,'RCon admin') !== false )
-                $answer = $get();
-
-            $output .= $answer;
-        } while ( $answer != '' );
-
-        return $output;
-    }
-
-
-    /**
-     * The heart of this class - this function actually sends the RCON command
-     *
-     * @param $command string   The command sent to the server
-     * @return bool             Whether sending the command was successful or not
-     * @throws \Exception       If the connection is closed
-     */
-    private function send($command)
-    {
-        if ( $this->disconnected )
-            throw new \Exception('[ARC] Failed to send command, because the connection is closed!');
-
-        $msgCRC = $this->getMsgCRC($command);
-        $head = "BE".chr(hexdec($msgCRC[0])).chr(hexdec($msgCRC[1])).chr(hexdec($msgCRC[2])).chr(hexdec($msgCRC[3])).chr(hexdec('ff')).chr(hexdec('01')).chr(hexdec(sprintf('%01b', 0)));
-        $msg = $head.$command;
-        $this->head = $head;
-
-        return fwrite($this->socket, $msg) === false ? false : true;
-    }
-
-
-    /**
-     * Closes the socket/connection
-     */
-    public function close()
-    {
-        if ( $this->disconnected )
-            return;
-
-        $this->send("Exit");
-
-        fclose($this->socket);
-
-        $this->socket = null;
-        $this->disconnected = true;
-    }
-
-
-    /**
-     * Creates again a connection to the server, manually closing the
-     * connection before is not needed. You may change the server-related data by using the optional parameters
-     *
-     * @throws \Exception       If the password is wrong
-     * @throws \Exception       If sending the heartbeat packet fails
-     * @throws \Exception       If creating the socket fails
-     */
-    private function connect()
-    {
-        if ( !$this->disconnected) 
-            $this->close();
-
-        $this->socket = @fsockopen("udp://".$this->serverIP, $this->serverPort, $errno, $errstr, $this->options['timeout_sec']);
-
-        stream_set_timeout($this->socket, $this->options['timeout_sec']);
-        stream_set_blocking($this->socket, true);
-
-        if ( !$this->socket )
-            throw new \Exception('[ARC] Failed to create socket!');
-
-        $this->authorize();
-
-        if ( $this->options['heartbeat'] )
-            $this->sendHeartbeat();
-
-        $this->disconnected = false;
-    }
-
-
-    /**
      * Sends a custom command to the BattlEye server
      *
      * @param string $command   Command sent to the server
      * @return string           Answer from the server
      * @throws \Exception       If wrong parameter types are passed to the function
+     * @throws \Exception       If sending the command failed
      */
     public function command($command)
     {
         if ( !is_string($command) )
             throw new \Exception('[ARC] Wrong parameter type!');
 
-        return $this->send($command) ? $this->getAnswer() : false;
+        $this->send($command);
+        return $this->getAnswer();
     }
 
 
@@ -305,15 +325,18 @@ class ARC {
      *
      * @param string $reason    Message displayed why the player is kicked
      * @param integer $player   The player who should be kicked
-     * @return bool             Whether sending the command was successful or not
-     * @throws \Exception
+     * @return ARC
+     * @throws \Exception       If wrong parameter types are passed to the function
+     * @throws \Exception       If sending the command failed
      */
     public function kickPlayer($player, $reason = 'Admin Kick')
     {
         if ( !is_int($player) || !is_string($reason) )
             throw new \Exception('[ARC] Wrong parameter type!');
 
-        return $this->send("kick $player $reason");
+        $this->send("kick $player $reason");
+        $this->reconnect();
+        return $this;
     }
 
 
@@ -321,15 +344,17 @@ class ARC {
      * Sends a global message to all players
      *
      * @param string $message   The message to send
-     * @return bool             Whether sending the command was successful or not
+     * @return ARC
      * @throws \Exception       If wrong parameter types are passed to the function
+     * @throws \Exception       If sending the command failed
      */
     public function sayGlobal($message)
     {
         if ( !is_string($message) )
             throw new \Exception('[ARC] Wrong parameter type!');
 
-        return $this->send("Say -1 ".$message);
+        $this->send("Say -1 ".$message);
+        return $this;
     }
 
 
@@ -338,26 +363,30 @@ class ARC {
      *
      * @param integer $player   Player who is sent the message
      * @param string $message   The message for the player
-     * @return bool             Whether sending the command was successful or not
+     * @return ARC
      * @throws \Exception       If wrong parameter types are passed to the function
+     * @throws \Exception       If sending the command failed
      */
     public function sayPlayer($player, $message)
     {
         if ( !is_int($player) || !is_string($message) )
             throw new \Exception('[ARC] Wrong parameter type!');
 
-        return $this->send("Say $player $message");
+        $this->send("Say $player $message");
+        return $this;
     }
 
 
     /**
      * Loads the "scripts.txt" file without the need to restart the server
      *
-     * @return bool             Whether sending the command was successful or not
+     * @return ARC
+     * @throws \Exception       If sending the command failed
      */
     public function loadScripts()
     {
-        return $this->send("loadScripts");
+        $this->send("loadScripts");
+        return $this;
     }
 
 
@@ -365,15 +394,17 @@ class ARC {
      * Changes the MaxPing value. If a player has a higher ping, he will be kicked from the server
      *
      * @param integer $ping     Max ping
-     * @return bool             Whether sending the command was successful or not
+     * @return ARC
      * @throws \Exception       If wrong parameter types are passed to the function
+     * @throws \Exception       If sending the command failed
      */
     public function maxPing($ping)
     {
         if ( !is_int($ping) )
             throw new \Exception('[ARC] Wrong parameter type!');
 
-        return $this->send("MaxPing $ping");
+        $this->send("MaxPing $ping");
+        return $this;
     }
 
 
@@ -381,37 +412,43 @@ class ARC {
      * Changes the RCon password
      *
      * @param string $password  The new password
-     * @return bool             Whether sending the command was successful or not
+     * @return ARC
      * @throws \Exception       If wrong parameter types are passed to the function
+     * @throws \Exception       If sending the command failed
      */
     public function changePassword($password)
     {
         if ( !is_string($password) )
             throw new \Exception('[ARC] Wrong parameter type!');
 
-        return $this->send("RConPassword $password");
+        $this->send("RConPassword $password");
+        return $this;
     }
 
 
     /**
      * (Re)load the BE ban list from bans.txt
      *
-     * @return bool             Whether sending the command was successful or not
+     * @return ARC
+     * @throws \Exception       If sending the command failed
      */
     public function loadBans()
     {
-        return $this->send("loadBans");
+        $this->send("loadBans");
+        return $this;
     }
 
 
     /**
      * Gets a list of all players currently on the server
      *
-     * @return string|bool      The list of all players on the server or, if sending failed, false
+     * @return string           The list of all players on the server
+     * @throws \Exception       If sending the command failed
      */
     public function getPlayers()
     {
-        return $this->send("players") ? $this->getAnswer() : false;
+        $this->send("players");
+        return $this->getAnswer();
     }
 
 
@@ -420,7 +457,8 @@ class ARC {
      *
      * @author nerdalertdk (https://github.com/nerdalertdk)
      * @link https://github.com/Nizarii/arma-rcon-class-php/issues/4
-     * @return array|bool      The list of all players on the server or, if sending failed, false
+     * @return array            The list of all players on the server
+     * @throws \Exception       If sending the command failed
      */
     public function getPlayersArray()
     {
@@ -440,11 +478,13 @@ class ARC {
     /**
      * Gets a list of all bans
      *
-     * @return string|bool      The list of missions or, if sending failed, false
+     * @return string           List containing the missions
+     * @throws \Exception       If sending the command failed
      */
     public function getMissions()
     {
-        return $this->send("missions") ? $this->getAnswer() : false;
+        $this->send("missions");
+        return $this->getAnswer();
     }
 
 
@@ -452,36 +492,41 @@ class ARC {
      * Ban a player's BE GUID from the server. If time is not specified or 0, the ban will be permanent;.
      * If reason is not specified the player will be kicked with the message "Banned".
      *
-     * @param string $player    Player who will be banned
+     * @param integer $player   Player (#) who will be banned
      * @param string $reason    Reason why the player is banned
-     * @param integer $time     How long the player is banned (0 = permanent)
-     * @return bool             Whether sending the command was successful or not
+     * @param integer $time     How long the player is banned in minutes (0 = permanent)
+     * @return ARC
      * @throws \Exception       If wrong parameter types are passed to the function
+     * @throws \Exception       If sending the command failed
      */
     public function banPlayer($player, $reason = "Banned", $time = 0)
     {
         if ( !is_int($player) || !is_string($reason) || !is_int($time) )
             throw new \Exception('[ARC] Wrong parameter type!');
 
-        return $this->send("ban $player $time $reason");
+        $this->send("ban $player $time $reason");
+        $this->reconnect();
+        return $this;
     }
 
 
     /**
      * Same as "ban_player", but allows to ban a player that is not currently on the server
      *
-     * @param string $player    Player who will be banned
+     * @param integer $player   Player who will be banned
      * @param string $reason    Reason why the player is banned
-     * @param integer $time     How long the player is banned (0 = permanent)
-     * @return bool             Whether sending the command was successful or not
+     * @param integer $time     How long the player is banned in minutes (0 = permanent)
+     * @return ARC
      * @throws \Exception       If wrong parameter types are passed to the function
+     * @throws \Exception       If sending the command failed
      */
     public function addBan($player, $reason = "Banned", $time = 0)
     {
         if ( !is_int($player) || !is_string($reason) || !is_int($time) )
             throw new \Exception('[ARC] Wrong parameter type!');
 
-        return $this->send("addBan $player $time $reason");
+        $this->send("addBan $player $time $reason");
+        return $this;
     }
 
 
@@ -489,11 +534,14 @@ class ARC {
      * Removes a ban
      *
      * @param integer $banid    Ban who will be removed
-     * @return bool             Whether sending the command was successful or not
+     * @return ARC
+     * @throws \Exception       If wrong parameter types are passed to the function
+     * @throws \Exception       If sending the command failed
      */
     public function removeBan($banid)
     {
-        return $this->send("removeBan $banid");
+        $this->send("removeBan $banid");
+        return $this;
     }
 
 
@@ -504,11 +552,9 @@ class ARC {
      * @link https://github.com/Nizarii/arma-rcon-class-php/issues/4
      * @return array|bool      The list of bans or, if sending failed, false
      */
-    public function getBansArray() {
+    public function getBansArray()
+    {
         $bansRaw = $this->getBans();
-
-        if ( $bansRaw === false )
-            return false;
 
         $bans = $this->cleanList($bansRaw);
         preg_match_all("#(\d+)\s+([0-9a-fA-F]+)\s([perm|\d]+)\s([\S ]+)$#im", $bans, $str);
@@ -521,22 +567,39 @@ class ARC {
     /**
      * Gets a list of all bans
      *
-     * @return string|bool      The list of bans or, if sending failed, false
+     * @return ARC
+     * @throws \Exception       If sending the command failed
      */
     public function getBans()
     {
-        return $this->send("bans") ? $this->getAnswer() : false;
+        $this->send("bans");
+        return $this->getAnswer();
     }
 
 
     /**
      * Removes expired bans from bans file
      *
-     * @return bool             Whether sending the command was successful or not
+     * @return ARC
+     * @throws \Exception       If sending the command failed
      */
     public function writeBans()
     {
-        return $this->send("writeBans");
+        $this->send("writeBans");
+        return $this;
+    }
+
+
+    /**
+     * Gets the current version of the BE server
+     *
+     * @return string           The BE server version
+     * @throws \Exception       If sending the command failed
+     */
+    public function getBEServerVersion()
+    {
+        $this->send("version");
+        return $this->getAnswer();
     }
 
 
@@ -545,6 +608,7 @@ class ARC {
      *
      * @author nerdalertdk (https://github.com/nerdalertdk)
      * @link https://github.com/Nizarii/arma-rcon-class-php/issues/4
+     * @param $str
      * @return array
      */
     private function formatList($str)
@@ -574,6 +638,7 @@ class ARC {
      *
      * @author nerdalertdk (https://github.com/nerdalertdk)
      * @link https://github.com/Nizarii/arma-rcon-class-php/issues/4
+     * @param $str
      * @return string
      */
     private function cleanList($str)
@@ -581,5 +646,3 @@ class ARC {
         return preg_replace('/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/', '', $str );
     }
 }
-
-

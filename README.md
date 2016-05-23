@@ -1,4 +1,4 @@
-# Arma RCon Class (ARC) 2.0 for PHP 
+# Arma RCon Class (ARC) 2.1 for PHP 
 [![Codacy](https://img.shields.io/codacy/f42d50a9693b4febb34fab3f68315365.svg)](https://www.codacy.com/app/nizari/arma-rcon-class-php)
 [![Packagist Version](https://img.shields.io/packagist/v/nizarii/arma-rcon-class.svg)](https://packagist.org/packages/nizarii/arma-rcon-class)
 [![GitHub license](https://img.shields.io/github/license/nizarii/arma-rcon-class-php.svg)](https://github.com/Nizarii/arma-rcon-class-php/)
@@ -15,7 +15,7 @@ ARC is a lightweight PHP class, which allows you connecting and sending commands
 <br>
 <br>
 ## Requirements
-ARC requires **PHP 5.3** or higher, nothing more!
+ARC requires **PHP 5.4** or higher, nothing more!
 <br>
 <br>
 ## Installation 
