@@ -39,11 +39,11 @@ After installing ARC, you need to create a new object. It will automatically cre
 ```php
 $rcon = new \Nizarii\ARC("Your server IP", Port, "RCon password");
 ```
-Then you are able to send commands with the `command()` function:
+You are able to send commands with the `command()` function:
 ```php
 $rcon->command("Say -1 hello!"); // To say something in global chat, you may use 'sayGlobal()', see 'Functions'
 ```
-ARC will throw Exceptions if anything goes wrong, so you can do a try-catch function:
+ARC will throw `Exceptions` if anything goes wrong, so you can do a try-catch function:
 ```php
 try 
 {
@@ -62,11 +62,11 @@ try
 } 
 catch (Exception $e) 
 {
-    echo "Ups! Something went wrong: ".$e->getMessage();
+    echo "Ups! Something went wrong: {$e->getMessage()}";
 }
 ```
 #### Options
-ARC can send a heartbeat packet to the server. In order to do this, you need to enable it:
+ARC can send a heartbeat packet to the server. In order to do this, you need to enable this feature:
 ```php
 $rcon = new \Nizarii\ARC("Your server IP", Port, "RCon password", [
     'heartbeat' => true, // must be a boolean
