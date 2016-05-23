@@ -48,13 +48,17 @@ ARC will throw Exceptions if anything goes wrong, so you can do a try-catch func
 try 
 {
     $rcon = new \Nizarii\ARC("Your server IP", Port, "RCon password");
-    
-    if ( $rcon->sayPlayer(0, "hey!") )
-       echo "success!";
-    else
-       echo "failed!";
        
     $array = $rcon->getPlayersArray();
+    
+    $rcon
+        ->sayGlobal('test')
+        ->kickPlayer(1, 'test')
+        ->sayPlayer(0, 'test')
+        ->close()
+    ;
+    
+    $rcon->getBans(); // Throws exception, because the connection was closed
 } 
 catch (Exception $e) 
 {
@@ -96,6 +100,7 @@ ARC features many functions to send BattlEye commands easier. After creating a n
 * `addBan(string $player, string $reason, int $time = 0)`:  Same as "banPlayer", but allows to ban a player that is not currently on the server.
 * `removeBan(int $banid)`:  Removes a ban.
 * `writeBans()`:  Removes expired bans from bans file.
+* `getBEServerVersion()`: Gets the current version of the BE server.
 
 *See [here](https://community.bistudio.com/wiki/BattlEye "BattlEye Wiki") for more information about BattlEye*
 <br>

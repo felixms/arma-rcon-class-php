@@ -173,6 +173,8 @@ class ARC {
             $this->close();
 
         $this->connect();
+        
+        return $this;
     }
 
 
