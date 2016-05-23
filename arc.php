@@ -119,14 +119,14 @@ class ARC {
      */
     public function __destruct()
     {
-        $this->close();
+        $this->disconnect();
     }
 
 
     /**
      * Closes the socket/connection
      */
-    public function close()
+    public function disconnect()
     {
         if ( $this->disconnected )
             return;
@@ -149,7 +149,7 @@ class ARC {
     private function connect()
     {
         if ( !$this->disconnected)
-            $this->close();
+            $this->disconnect();
 
         $this->socket = @fsockopen("udp://$this->serverIP", $this->serverPort, $errno, $errstr, $this->options['timeout_sec']);
 
@@ -176,7 +176,7 @@ class ARC {
     public function reconnect()
     {
         if ( !$this->disconnected )
-            $this->close();
+            $this->disconnect();
 
         $this->connect();
 

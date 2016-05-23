@@ -55,7 +55,7 @@ try
         ->sayGlobal('test')
         ->kickPlayer(1, 'test')
         ->sayPlayer(0, 'test')
-        ->close()
+        ->disconnect()
     ;
     
     $rcon->getBans(); // Throws exception, because the connection was closed
@@ -101,6 +101,8 @@ ARC features many functions to send BattlEye commands easier. After creating a n
 * `removeBan(int $banid)`:  Removes a ban.
 * `writeBans()`:  Removes expired bans from bans file.
 * `getBEServerVersion()`: Gets the current version of the BE server.
+* `disconnect()`: Closes the connection
+* `reconnect()`: Closes the connection & opens a new one
 
 *See [here](https://community.bistudio.com/wiki/BattlEye "BattlEye Wiki") for more information about BattlEye*
 <br>
