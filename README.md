@@ -37,7 +37,7 @@ Just include ARC in your project: `require_once 'arc.php';`
 #### Getting started
 After installing ARC, you need to create a new object. It will automatically create a new connection to the server and login:
 ```php
-$rcon = new \Nizarii\ARC("Your server IP", Port, "RCon password");
+$rcon = new \Nizarii\ARC("Your server IP", "RCon password", Port);
 ```
 You are able to send commands with the `command()` function:
 ```php
@@ -47,7 +47,7 @@ ARC will throw `Exceptions` if anything goes wrong, so you can do a try-catch fu
 ```php
 try 
 {
-    $rcon = new \Nizarii\ARC("Your server IP", Port, "RCon password");
+    $rcon = new \Nizarii\ARC("Your server IP", "RCon password", Port);
        
     $array = $rcon->getPlayersArray();
     
