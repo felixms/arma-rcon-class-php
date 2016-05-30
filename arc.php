@@ -2,7 +2,7 @@
 
 /**
  *
- * ARC, an easy-to-use PHP class to send commands via  RCon to Arma servers.
+ * ARC, an easy-to-use PHP class to send commands via RCon to ARMA servers.
  *
  * @author   Felix Schäfer <nizari@starwolf-dev.com>
  * @since    September 26, 2015
