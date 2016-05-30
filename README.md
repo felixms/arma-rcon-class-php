@@ -1,4 +1,4 @@
-# Arma RCon Class for PHP (ARC)
+# Arma RCon Class (ARC) 1.3 for PHP 
 
 ARC is a lightweight PHP class, which let's you easily send commands via  RCon to your Arma server. See "Supported Server" for a full list of supported Arma games.
 <br>
@@ -15,6 +15,21 @@ Please consider that mods normally don't change the BattlEye server settings, so
 <br>
 ## Requirements
 ARC only requires **PHP 5.3**, nothing more!
+<br>
+<br>
+## Installation 
+#### Via Composer
+If you haven't already, download Composer
+```shell
+$ curl -s http://getcomposer.org/installer | php
+```
+Now require and install ARC
+```shell
+$ composer require nizarii/arma-rcon-class "1.3.*"
+$ composer install
+```
+#### Without Composer
+Just include ARC in your project: `require_once 'ArmaRConClass/rcon.php';` 
 <br>
 <br>
 ## Examples
@@ -44,7 +59,7 @@ try
 } 
 catch (Exception $e) 
 {
-    echo "Ups! Something went wrong: ".$e->getMessage();
+    echo "Ups! Something went wrong: {$e->getMessage()}";
 }
 ```
 #### Options
