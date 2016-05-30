@@ -4,15 +4,14 @@ ARC is a lightweight PHP class, which let's you easily send commands via  RCon t
 <br>
 <br>
 ## Supported Servers
-Please consider that mods normally don't change the BattlEye server settings, so this class also works for sending RCON commands  to servers running mods (e.g Altis Life, DayZ, Epoch etc.).
+Please consider that mods normally don't change the BattlEye server settings, so this class also works for sending RCON commands  to servers running mods (e.g Altis Life, DayZ, Epoch).
 
 | App ID        | Game          | RCON Support       |
 |---------------|---------------|:------------------:|
 |233780         | Arma 3        | :white_check_mark: |
-|------         | DayZ Standalone*        | :white_check_mark: |
 |33935          | Arma 2: Operation Arrowhead       | :white_check_mark: |
 |33905          | Arma 2        | :white_check_mark: |
-*RCon is only usable on Privates Hives of DayZ SA Servers (thanks to JaG-v2)
+
 <br>
 ## Requirements
 ARC only requires **PHP 5.3**, nothing more!
@@ -83,7 +82,8 @@ ARC features many functions to send BattlEye commands easier:
 * `remove_ban(int $banid)`:  Removes a ban.*
 * `write_bans()`:  Removes expired bans from bans file.*
 * `disconnect()`:  Closes the existing connection to the BattlEye server manually, sending commands after calling this function is not possible.
-* `connect(string $ServerIP = "", int $ServerPort = "", string $RConPassword = "")`:  Creates a new connection to the server and closes the existing one. Note: It's not required to call disconnect() before.
+* `connect(string $ServerIP = "", int $ServerPort = 2302, string $RConPassword = "")`:  Creates a new connection to the server and closes the existing one. Note: It's not required to call disconnect() before.
+* `reconnect()`: Closes the connection & opens a new one.
 
 *These functions will return true if the execution was successful and false if it failed.
 <br>
@@ -92,24 +92,4 @@ See [here](https://community.bistudio.com/wiki/BattlEye "BattlEye Wiki") for mor
 <br>
 ## License
 
-The MIT License (MIT)
-
-Copyright (c) 2015 Felix Schäfer
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+ARC is licensed under the MIT License. See `LICENSE`-file for further information.

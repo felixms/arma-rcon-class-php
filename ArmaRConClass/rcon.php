@@ -2,13 +2,13 @@
 
 /**
  *
- * ARC, an easy-to-use PHP class to send commands via  RCon to Arma servers.
+ * ARC, an easy-to-use PHP class to send commands via RCon to ARMA servers.
  *
  * @author   Felix Schäfer <nizari@starwolf-dev.com>
  * @since    September 26, 2015
  * @link     https://github.com/Nizarii/arma-rcon-php-class
  * @license  MIT-License
- * @version  1.3.5
+ * @version  1.3.6
  *
  */
 
@@ -114,17 +114,31 @@ class ARC {
 
 
     /**
+     * Closes the current connection and creates a new one
+     */
+    public function reconnect()
+    {
+        if ( !$this->disconnected )
+            $this->disconnect();
+
+        $this->connect();
+    }
+
+
+    /**
      * Sends the login data to the server in order to send commands later
      *
      * @throws AuthorizationException      If login fails (password wrong)
      */
     private function authorize()
     {
-        if ( fwrite($this->socket, $this->get_loginmessage()) === false ) throw new PacketException('[ARC] Failed to send login!');
+        if ( fwrite($this->socket, $this->get_loginmessage()) === false )
+            throw new PacketException('[ARC] Failed to send login!');
 
         $result = fread($this->socket, 16);
 
-        if ( ord($result[strlen($result)-1]) == 0 ) throw new AuthorizationException('[ARC] Login failed, wrong password!');
+        if ( ord($result[strlen($result)-1]) == 0 )
+            throw new AuthorizationException('[ARC] Login failed, wrong password!');
     }
 
 
@@ -183,7 +197,8 @@ class ARC {
         $hb_msg = "BE".chr(hexdec("7d")).chr(hexdec("8f")).chr(hexdec("ef")).chr(hexdec("73"));
         $hb_msg .= chr(hexdec('ff')).chr(hexdec('02')).chr(hexdec('00'));
 
-        if ( fwrite($this->socket, $hb_msg) === false ) throw new PacketException('[ARC] Failed to send heartbeat packet!');
+        if ( fwrite($this->socket, $hb_msg) === false )
+            throw new PacketException('[ARC] Failed to send heartbeat packet!');
     }
 
 
@@ -194,7 +209,13 @@ class ARC {
      */
     private function get_answer()
     {
-        $get = function() { return substr(fread($this->socket, 102400), strlen($this->head)); };
+        $head = $this->head;
+        $socket = $this->socket;
+
+        $get = function() use ($head, $socket) {
+            return substr(fread($socket, 102400), strlen($head));
+        };
+
         $output = '';
 
         do {
@@ -216,7 +237,8 @@ class ARC {
      */
     private function send($command)
     {
-        if ( $this->disconnected ) throw new \Exception('[ARC] Failed to send command, because the connection is closed!');
+        if ( $this->disconnected )
+            throw new \Exception('[ARC] Failed to send command, because the connection is closed!');
 
         $msgCRC = $this->get_msgCRC($command);
         $head = "BE".chr(hexdec($msgCRC[0])).chr(hexdec($msgCRC[1])).chr(hexdec($msgCRC[2])).chr(hexdec($msgCRC[3])).chr(hexdec('ff')).chr(hexdec('01')).chr(hexdec(sprintf('%01b', 0)));
@@ -237,8 +259,6 @@ class ARC {
     {
         if ( $this->disconnected ) return;
 
-        $this->send("Exit");
-
         fclose($this->socket);
 
         $this->socket = null;
@@ -251,31 +271,39 @@ class ARC {
      * connection before is not needed. You may change the server-related data by using the optional parameters
      *
      * @param string $ServerIP           New server IP, if not specified here, the IP from the constructor will be used
-     * @param string $ServerPort         New server port, if not specified here, the port from the constructor will be used
+     * @param int $ServerPort            New server port, if not specified here, the port from the constructor will be used
      * @param string $RConPassword       New RCon password, if not specified here, the RCon password from the constructor will be used
      *
      * @throws AuthorizationException    If the password is wrong
      * @throws PacketException           If sending the heartbeat packet fails
      * @throws SocketException           If creating the socket fails
      */
-    public function connect($ServerIP = "", $ServerPort = "", $RConPassword = "")
+    public function connect($ServerIP = "", $ServerPort = 2302, $RConPassword = "")
     {
-        if ( !$this->disconnected) $this->disconnect();
+        if ( !$this->disconnected) 
+            $this->disconnect();
 
-        if ( $ServerIP != "" ) $this->serverIP = $ServerIP;
-        if ( $ServerPort != "" ) $this->serverPort = $ServerPort;
-        if ( $RConPassword != "" ) $this->RCONpassword = $RConPassword;
+        if ( !empty($ServerIP) )
+            $this->serverIP = $ServerIP;
+        
+        if ( !empty($ServerPort) )
+            $this->serverPort = $ServerPort;
+
+        if ( !empty($RConPassword) )
+            $this->RCONpassword = $RConPassword;
 
         $this->socket = @fsockopen("udp://".$this->serverIP, $this->serverPort, $errno, $errstr, $this->options['timeout_seconds']);
 
         stream_set_timeout($this->socket, $this->options['timeout_seconds']);
         stream_set_blocking($this->socket, true);
 
-        if ( !$this->socket ) throw new SocketException('[ARC] Failed to create socket!');
+        if ( !$this->socket )
+            throw new SocketException('[ARC] Failed to create socket!');
 
         $this->authorize();
 
-        if ( $this->options['send_heartbeat'] ) $this->send_heartbeat();
+        if ( $this->options['send_heartbeat'] )
+            $this->send_heartbeat();
 
         $this->disconnected = false;
     }
@@ -297,11 +325,15 @@ class ARC {
      * Kicks a player who is currently on the server
      *
      * @param integer $player   The player who should be kicked
+     * @param string $reason    Message displayed why the player is kicked
      * @return bool             Whether sending the command was successful or not
      */
     public function kick_player($player, $reason = 'Admin Kick')
     {
-        return $this->send("kick ".$player." ".$reason);
+        $sent = $this->send("kick $player $reason");
+        $this->reconnect();
+
+        return $sent;
     }
 
 
@@ -313,7 +345,7 @@ class ARC {
      */
     public function say_global($message)
     {
-        return $this->send("Say -1 ".$message);
+        return $this->send("Say -1 $message");
     }
 
 
@@ -326,7 +358,7 @@ class ARC {
      */
     public function say_player($player, $message)
     {
-        return $this->send("Say ".$player.$message);
+        return $this->send("Say $player $message");
     }
 
 
@@ -349,7 +381,7 @@ class ARC {
      */
     public function max_ping($ping)
     {
-        return $this->send("MaxPing ".$ping);
+        return $this->send("MaxPing $ping");
     }
 
 
@@ -361,7 +393,7 @@ class ARC {
      */
     public function change_password($password)
     {
-        return $this->send("RConPassword ".$password);
+        return $this->send("RConPassword $password");
     }
 
 
@@ -421,7 +453,10 @@ class ARC {
      */
     public function ban_player($player, $reason = "Banned", $time = 0)
     {
-        return $this->send("ban ".$player." ".$time." ".$reason);
+        $sent = $this->send("ban $player $time $reason");
+        $this->reconnect();
+
+        return $sent;
     }
 
 
@@ -435,7 +470,7 @@ class ARC {
      */
     public function add_ban($player, $reason = "Banned", $time = 0)
     {
-        return $this->send("addBan ".$player." ".$time." ".$reason);
+        return $this->send("addBan $player $time $reason");
     }
 
 
@@ -447,7 +482,7 @@ class ARC {
      */
     public function remove_ban($banid)
     {
-        return $this->send("removeBan ".$banid);
+        return $this->send("removeBan $banid");
     }
 
 
