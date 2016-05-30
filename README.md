@@ -37,9 +37,9 @@ Just include ARC in your project: `require_once 'arc.php';`
 #### Getting started
 After installing ARC, you need to create a new object. It will automatically create a new connection to the server and login:
 ```php
-$rcon = new \Nizarii\ARC("Your server IP", "RCon password", Port);
+$rcon = new \Nizarii\ARC("Your server IP", "RCon password");
 ```
-You are able to send commands with the `command()` function:
+The default port is `2302`. You are able to send commands with the `command()` function:
 ```php
 $rcon->command("Say -1 hello!"); // To say something in global chat, you may use 'sayGlobal()', see 'Functions'
 ```
@@ -68,13 +68,13 @@ catch (Exception $e)
 #### Options
 ARC can send a heartbeat packet to the server. In order to do this, you need to enable this feature:
 ```php
-$rcon = new \Nizarii\ARC("Your server IP", Port, "RCon password", [
+$rcon = new \Nizarii\ARC("Your server IP", "RCon password", Port, [
     'heartbeat' => true, // must be a boolean
 ]);
 ```
 Another option is `timeout_seconds`, which sets a timeout value on the connection:
 ```php
-$rcon = new \Nizarii\ARC("Your server IP", Port, "RCon password", [
+$rcon = new \Nizarii\ARC("Your server IP", "RCon password", Port, [
     'timeout_sec'      => 1, // must be an integer, by default 1 second
 ]);
     
@@ -101,8 +101,8 @@ ARC features many functions to send BattlEye commands easier. After creating a n
 * `removeBan(int $banid)`:  Removes a ban.
 * `writeBans()`:  Removes expired bans from bans file.
 * `getBEServerVersion()`: Gets the current version of the BE server.
-* `disconnect()`: Closes the connection
-* `reconnect()`: Closes the connection & opens a new one
+* `disconnect()`: Closes the connection.
+* `reconnect()`: Closes the connection & opens a new one.
 
 *See [here](https://community.bistudio.com/wiki/BattlEye "BattlEye Wiki") for more information about BattlEye*
 <br>
