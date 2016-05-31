@@ -46,7 +46,7 @@ ARC will throw Exceptions if anything goes wrong, so you could do a try-catch fu
 ```php
 try 
 {
-    $rcon = new \Nizarii\ARC("Your server IP", Port, "RCon password");
+    $rcon = new \Nizarii\ArmaRConClass\ARC("Your server IP", Port, "RCon password");
     
     if ($rcon->say_player(0, "hey!"))  // say_player returns true/false, see functions list
     {
@@ -65,16 +65,16 @@ catch (Exception $e)
 #### Options
 ARC can send a heartbeat packet to the server. In order to do this, you need to enable it:
 ```php
-$rcon = new \Nizarii\ARC("Your server IP", Port, "RCon password", array (
+$rcon = new \Nizarii\ArmaRConClass\ARC("Your server IP", Port, "RCon password", array (
         'heartbeat' => true,
     ));
 ```
 Another option is `timeout_seconds`, which sets a timeout value on the connection:
 ```php
-$rcon = new \Nizarii\ARC("Your server IP", Port, "RCon password", array (
+$rcon = new \Nizarii\ArmaRConClass\ARC("Your server IP", Port, "RCon password", array (
         'send_heartbeat'       => true,
         'timeout_seconds'      => 1, // by default 1 second
-    ));
+));
     
 $rcon->write_bans(); 
 ```
