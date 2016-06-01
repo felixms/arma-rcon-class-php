@@ -15,7 +15,7 @@ ARC is a lightweight PHP class, which allows you connecting and sending commands
 <br>
 <br>
 ## Requirements
-ARC requires **PHP 5.4** or higher, nothing more!
+ARC 2.1 requires **PHP 5.4** or higher, nothing more! (*For <b>PHP 5.3</b> support use [ARC 1.3](https://github.com/Nizarii/arma-rcon-class-php/tree/ARC-1.3)*)
 <br>
 <br>
 ## Installation 
