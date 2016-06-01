@@ -36,7 +36,7 @@ Just include ARC in your project: `require_once 'ArmaRConClass/rcon.php';`
 #### Getting started
 After including `rcon.php` in your project, you need to create a new object. It will automatically create a new connection to the server, so you don't need to call `connect()`, e.g.:
 ```php
-$rcon = new \Nizarii\ARC("Your server IP", Port, "RCon password");
+$rcon = new \Nizarii\ArmaRConClass\ARC("Your server IP", Port, "RCon password");
 ```
 Then you are able to send commands with the `command()` function:
 ```php
@@ -44,8 +44,7 @@ $rcon->command("Say -1 hello!"); // To say something in global chat, you may use
 ```
 ARC will throw Exceptions if anything goes wrong, so you could do a try-catch function:
 ```php
-try 
-{
+try {
     $rcon = new \Nizarii\ArmaRConClass\ARC("Your server IP", Port, "RCon password");
     
     if ($rcon->say_player(0, "hey!"))  // say_player returns true/false, see functions list
@@ -56,9 +55,7 @@ try
     {
        echo "failed!";
     }
-} 
-catch (Exception $e) 
-{
+} catch (Exception $e) {
     echo "Ups! Something went wrong: {$e->getMessage()}";
 }
 ```
@@ -67,7 +64,7 @@ ARC can send a heartbeat packet to the server. In order to do this, you need to 
 ```php
 $rcon = new \Nizarii\ArmaRConClass\ARC("Your server IP", Port, "RCon password", array (
         'heartbeat' => true,
-    ));
+));
 ```
 Another option is `timeout_seconds`, which sets a timeout value on the connection:
 ```php
