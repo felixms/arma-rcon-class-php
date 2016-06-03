@@ -8,7 +8,7 @@
  * @since    September 26, 2015
  * @link     https://github.com/Nizarii/arma-rcon-php-class
  * @license  MIT-License
- * @version  2.1
+ * @version  2.1.1
  *
  */
 
@@ -54,7 +54,7 @@ class ARC {
      *
      * @var string
      */
-    public $RCONpassword;
+    public $RConPassword;
 
 
     /**
@@ -90,18 +90,18 @@ class ARC {
      *
      * @param string $serverIP             IP of the Arma server
      * @param integer $serverPort          Port of the Arma server
-     * @param string  $RCONpassword        RCon password required by BattlEye
+     * @param string  $RConPassword        RCon password required by BattlEye
      * @param array  $options              Options array of ARC
      * @throws \Exception                  If wrong parameter types are passed to the function
      */
-    public function __construct($serverIP, $RCONpassword, $serverPort = 2302, array $options = array())
+    public function __construct($serverIP, $RConPassword, $serverPort = 2302, array $options = array())
     {
-        if ( !is_int($serverPort) || !is_string($RCONpassword) || !is_string($serverIP) )
+        if ( !is_int($serverPort) || !is_string($RConPassword) || !is_string($serverIP) )
             throw new \Exception('[ARC] Wrong parameter type!');
 
         $this->serverIP = $serverIP;
         $this->serverPort = $serverPort;
-        $this->RCONpassword = $RCONpassword;
+        $this->RConPassword = $RConPassword;
         $this->options = array_merge($this->options, $options);
 
         if ( !is_int($this->options['timeout_sec']) )
@@ -228,7 +228,7 @@ class ARC {
 
 
     /**
-     * The heart of this class - this function actually sends the RCON command
+     * The heart of this class - this function actually sends the RCon command
      *
      * @param $command string   The command sent to the server
      * @return bool             Whether sending the command was successful or not
@@ -257,7 +257,7 @@ class ARC {
      */
     private function getAuthCRC()
     {
-        $authCRC = sprintf("%x", crc32(chr(255).chr(00).trim($this->RCONpassword)));
+        $authCRC = sprintf("%x", crc32(chr(255).chr(00).trim($this->RConPassword)));
         $authCRC = array(substr($authCRC,-2,2),substr($authCRC,-4,2),substr($authCRC,-6,2),substr($authCRC,0,2));
 
         return $authCRC;
@@ -289,7 +289,7 @@ class ARC {
         $authCRC = $this->getAuthCRC();
 
         $loginmsg = "BE".chr(hexdec($authCRC[0])).chr(hexdec($authCRC[1])).chr(hexdec($authCRC[2])).chr(hexdec($authCRC[3]));
-        $loginmsg .= chr(hexdec('ff')).chr(hexdec('00')).$this->RCONpassword;
+        $loginmsg .= chr(hexdec('ff')).chr(hexdec('00')).$this->RConPassword;
 
         return $loginmsg;
     }
@@ -307,6 +307,16 @@ class ARC {
 
         if ( fwrite($this->socket, $hb_msg) === false )
             throw new \Exception('[ARC] Failed to send heartbeat packet!');
+    }
+
+
+    /**
+     * Returns the socket used by ARC, might be null if connection is closed
+     *
+     * @return null|resource
+     */
+    public function getSocket() {
+        return $this->socket;
     }
 
 
@@ -472,9 +482,6 @@ class ARC {
     {
         $playersRaw = $this->getPlayers();
 
-        if ( $playersRaw === false )
-            return false;
-
         $players = $this->cleanList($playersRaw);
         preg_match_all("#(\d+)\s+(\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+\b)\s+(\d+)\s+([0-9a-fA-F]+)\(\w+\)\s([\S ]+)$#im", $players, $str);
         $result = $this->formatList($str);
@@ -558,7 +565,7 @@ class ARC {
      *
      * @author nerdalertdk (https://github.com/nerdalertdk)
      * @link https://github.com/Nizarii/arma-rcon-class-php/issues/4
-     * @return array|bool      The list of bans or, if sending failed, false
+     * @return array            The list of bans or, if sending failed, false
      */
     public function getBansArray()
     {
@@ -575,7 +582,7 @@ class ARC {
     /**
      * Gets a list of all bans
      *
-     * @return ARC
+     * @return string
      * @throws \Exception       If sending the command failed
      */
     public function getBans()
