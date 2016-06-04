@@ -39,7 +39,7 @@ After installing ARC, you can easily use ARC as shown below. It will automatical
 ```php
 use \Nizarii\ARC;
 
-$rcon = new ARC(string $ServerIP, string $RConPassword [, int Port = 2302 [, array $Options = array()]]);
+$rcon = new ARC(string $ServerIP, string $RConPassword [, int $Port = 2302 [, array $Options = array()]]);
 ```
 You are able to send commands with the `command()` function:
 ```php
@@ -74,7 +74,7 @@ Please consider that ARC only checks whether the command has been *successfully 
 <br><br>
 #### Options
 Options can be passed to ARC as an array via the fourth parameter of the constructor. The following options are currently available:
-* `bool heartbeat = false`: Send a heartbeat packet to the server
+* `bool heartbeat = false`: Sends a heartbeat packet to the server
 * `int timeout_sec = 1`: Sets a timeout value on the connection
 
 *Suggestions for new options are always welcome!*
@@ -83,7 +83,7 @@ Basic options usage:
 ```php
 use \Nizarii\ARC;
 
-$rcon = new ARC('127.0.0.1', 'RCon password', 2322, [
+$rcon = new ARC('127.0.0.1', 'RConPassword', 2322, [
     'heartbeat'    => true,
     'timeout_sec'  => 2
 ]);
@@ -113,7 +113,7 @@ ARC features many functions to send BattlEye commands easier. After creating a n
 * `object getBEServerVersion()`: Gets the current version of the BE server
 * `disconnect()`: Closes the current connection
 * `object reconnect()`: Closes the current connection & creates a new one
-* `resource getSocket()`: Get the socket used by ARC to send commands
+* `resource|null getSocket()`: Get the socket used by ARC to send commands
 
 *See [here](https://community.bistudio.com/wiki/BattlEye "BattlEye Wiki") for more information about BattlEye*
 <br>
