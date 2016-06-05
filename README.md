@@ -1,5 +1,5 @@
 # Arma RCon Class (ARC) 2.1 for PHP 
-[![Codacy](https://img.shields.io/codacy/f42d50a9693b4febb34fab3f68315365.svg)](https://www.codacy.com/app/nizari/arma-rcon-class-php)
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/f42d50a9693b4febb34fab3f68315365)](https://www.codacy.com/app/nizari/arma-rcon-class-php?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Nizarii/arma-rcon-class-php&amp;utm_campaign=Badge_Grade)
 [![Packagist Version](https://img.shields.io/packagist/v/nizarii/arma-rcon-class.svg)](https://packagist.org/packages/nizarii/arma-rcon-class)
 [![GitHub License](https://img.shields.io/github/license/nizarii/arma-rcon-class-php.svg)](https://github.com/Nizarii/arma-rcon-class-php/)
 
