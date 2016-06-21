@@ -3,15 +3,7 @@
 [![Packagist Version](https://img.shields.io/packagist/v/nizarii/arma-rcon-class.svg)](https://packagist.org/packages/nizarii/arma-rcon-class)
 [![GitHub License](https://img.shields.io/github/license/nizarii/arma-rcon-class-php.svg)](https://github.com/Nizarii/arma-rcon-class-php/)
 
-ARC is a lightweight PHP class, which allows you connecting and sending commands easily via RCon to your ARMA game server. See "Supported Servers" for a list of supported games.
-<br>
-<br>
-## Supported Servers
-| App ID        | Game          | RCon Support       |
-|---------------|---------------|:------------------:|
-|233780         | Arma 3        | :white_check_mark: |
-|33935          | Arma 2: Operation Arrowhead       | :white_check_mark: |
-|33905          | Arma 2        | :white_check_mark: |
+ARC is a lightweight PHP class, which allows you connecting and sending commands easily to your *BattlEye* server, including the most popular game servers *Arma 3*, *Arma 2* and *Arma 2: OA*.
 <br>
 <br>
 ## Requirements
@@ -19,7 +11,7 @@ ARC 2.1 requires **PHP 5.4** or higher, nothing more! *(For <b>PHP 5.3</b> suppo
 <br>
 <br>
 ## Installation 
-#### Via Composer
+#### Via Composer *(recommended)*
 If you haven't already, download Composer
 ```shell
 $ curl -s http://getcomposer.org/installer | php
@@ -30,12 +22,12 @@ $ composer require nizarii/arma-rcon-class
 $ composer install
 ```
 #### Without Composer
-Just include ARC in your project: `require_once 'arc.php';` 
+Just include the class in your project: `require_once 'arc.php';`
 <br>
 <br>
 ## Examples
 #### Getting started
-After installing ARC, you can easily use ARC as shown below. It will automatically establish a new connection to the server and login:
+After installing ARC, you can easily use ARC as shown below. It will automatically establish a new connection and authenticate
 ```php
 use \Nizarii\ARC;
 
@@ -50,8 +42,7 @@ ARC will throw `Exceptions` if anything goes wrong, so you can do a try-catch fu
 ```php
 use \Nizarii\ARC;
 
-try 
-{
+try {
     $rcon = new ARC('127.0.0.1', 'password');
        
     $array = $rcon->getPlayersArray();
@@ -64,28 +55,26 @@ try
     ;
     
     $rcon->getBans(); // Throws exception, because the connection was closed
-} 
-catch (Exception $e) 
-{
+} catch (Exception $e) {
     echo "Ups! Something went wrong: {$e->getMessage()}";
 }
 ```
-Please consider that ARC only checks whether the command has been *successfully sent* via the socket to the server. It *does not* check if the command has been executed on the server-side.
+*Please consider that ARC only checks whether the command has been **successfully sent** via the socket to the server. It **does not** check if the command has been **executed** on the server-side.*
 <br><br>
 #### Options
 Options can be passed to ARC as an array via the fourth parameter of the constructor. The following options are currently available:
-* `bool heartbeat = false`: Sends a heartbeat packet to the server
-* `int timeout_sec = 1`: Sets a timeout value on the connection
+* `bool sendHeartbeat = false`: Sends a heartbeat packet to the server
+* `int timeoutSec = 1`: Sets a timeout value on the connection
 
-*Suggestions for new options are always welcome!*
+*Suggestions for new options are always welcome!* :+1: 
 <br>
-Basic options usage:
+Basic option usage:
 ```php
 use \Nizarii\ARC;
 
 $rcon = new ARC('127.0.0.1', 'RConPassword', 2322, [
-    'heartbeat'    => true,
-    'timeout_sec'  => 2
+    'sendHeartbeat' => true,
+    'timeoutSec' => 2
 ]);
     
 //...
@@ -120,4 +109,4 @@ ARC features many functions to send BattlEye commands easier. After creating a n
 <br>
 ## License
 
-ARC is licensed under the MIT License. See `LICENSE`-file for further information.
+ARC is licensed under the **MIT License**. View `LICENSE` file for more information.

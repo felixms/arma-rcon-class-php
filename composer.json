@@ -2,7 +2,7 @@
   "name": "nizarii/arma-rcon-class",
   "homepage": "https://github.com/Nizarii/arma-rcon-class-php/",
   "type": "library",
-  "description": "ARC allows you connecting and sending commands easily via RCon to your ARMA game server",
+  "description": "ARC allows you connecting and sending commands easily to your BattlEye server",
   "require": {
     "php": ">=5.4.0"
   },
@@ -16,12 +16,12 @@
   ],
   "keywords": [
     "rcon",
+    "battleye",
+    "client",
     "arma3",
     "arma2",
     "dayz",
     "lightweight",
-    "altislife",
-    "operation arrowhead",
     "class"
   ],
   "autoload": {
