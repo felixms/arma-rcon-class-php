@@ -3,7 +3,7 @@
 [![Packagist Version](https://img.shields.io/packagist/v/nizarii/arma-rcon-class.svg)](https://packagist.org/packages/nizarii/arma-rcon-class)
 [![GitHub License](https://img.shields.io/github/license/nizarii/arma-rcon-class-php.svg)](https://github.com/Nizarii/arma-rcon-class-php/)
 
-ARC is a lightweight PHP class, which allows you connecting and sending commands easily to your **BattlEye** server, including the most popular game servers **Arma 3**, **Arma 2** and **Arma 2: OA**.
+ARC is a lightweight PHP class, which allows you connecting and sending commands easily to your **BattlEye** server, including **Arma 3**, **Arma 2** and **Arma 2: OA** game servers.
 <br>
 <br>
 ## Requirements
@@ -23,7 +23,7 @@ $ composer install
 ```
 <br>
 #### Without Composer
-Just include the class in your project: `require_once 'arc.php';`
+Choose a [release](https://github.com/Nizarii/arma-rcon-class-php/releases) and include ARC in your project: `require_once 'arc.php';`
 <br>
 <br>
 ## Examples
@@ -103,9 +103,9 @@ ARC features many functions to send BattlEye commands easier. After creating a n
 * `object getBEServerVersion()`: Gets the current version of the BE server
 * `disconnect()`: Closes the current connection
 * `object reconnect()`: Closes the current connection & creates a new one
-* `resource|null getSocket()`: Get the socket used by ARC to send commands
+* `resource getSocket()`: Get the socket used by ARC to send commands
 
-*See [here](https://community.bistudio.com/wiki/BattlEye "BattlEye Wiki") for more information about BattlEye*
+*See [here](https://community.bistudio.com/wiki/BattlEye#RCon_commands "BattlEye Wiki") for more information about BattlEye commands*
 <br>
 <br>
 ## License

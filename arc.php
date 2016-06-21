@@ -18,11 +18,9 @@ namespace Nizarii;
 class ARC
 {
     /**
-     * Options for ARC stored in an array
-     *
-     * @var array
+     * @var array Options for ARC stored in an array
      */
-    public $options = [
+    private $options = [
         'sendHeartbeat' => false,
         'timeoutSec'    => 1,
     ];
@@ -30,28 +28,25 @@ class ARC
     /**
      * @var string Server IP of the BattlEye server
      */
-    public $serverIP;
+    private $serverIP;
 
     /**
      * @var int Specific port of the BattlEye server
      */
-    public $serverPort;
+    private $serverPort;
 
     /**
      * @var string Required password for authenticating
      */
-    public $rconPassword;
+    private $rconPassword;
 
     /**
      * @var resource Socket for sending commands
      */
-    private $socket = null;
+    private $socket;
 
     /**
-     * If this value is true, it means that the connection is closed,
-     * so connect() is available
-     *
-     * @var bool
+     * @var bool Status of the connection
      */
     private $disconnected = true;
 
@@ -102,7 +97,7 @@ class ARC
     }
 
     /**
-     * Closes the socket/connection
+     * Closes the connection
      */
     public function disconnect()
     {
@@ -253,7 +248,8 @@ class ARC
      *
      * @return int
      */
-    private function writeToSocket($message) {
+    private function writeToSocket($message)
+    {
         return fwrite($this->socket, $message);
     }
 
@@ -318,9 +314,10 @@ class ARC
     /**
      * Returns the socket used by ARC, might be null if connection is closed
      *
-     * @return null|resource
+     * @return resource
      */
-    public function getSocket() {
+    public function getSocket()
+    {
         return $this->socket;
     }
 
@@ -543,7 +540,7 @@ class ARC
     }
 
     /**
-     * Same as "ban_player", but allows to ban a player that is not currently on the server
+     * Same as "banPlayer", but allows to ban a player that is not currently on the server
      *
      * @param integer $player Player who will be banned
      * @param string $reason  Reason why the player is banned
@@ -605,7 +602,7 @@ class ARC
      */
     public function getBans()
     {
-        $this->send("bans");
+        $this->send('bans');
 
         return $this->getResponse();
     }
@@ -617,7 +614,7 @@ class ARC
      */
     public function writeBans()
     {
-        $this->send("writeBans");
+        $this->send('writeBans');
 
         return $this;
     }
@@ -629,7 +626,7 @@ class ARC
      */
     public function getBEServerVersion()
     {
-        $this->send("version");
+        $this->send('version');
 
         return $this->getResponse();
     }
