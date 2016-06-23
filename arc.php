@@ -157,7 +157,8 @@ class ARC
     /**
      * Checks if ARC's option array contains any deprecated options
      */
-    private function checkDeprecatedOptions() {
+    private function checkDeprecatedOptions()
+    {
         if (array_key_exists('timeout_sec', $this->options)) {
             @trigger_error("The 'timeout_sec' option is deprecated since version 2.1.2 and will be removed in 3.0. Use 'timeoutSec' instead.", E_USER_DEPRECATED);
             $this->options['timeoutSec'] = $this->options['timeout_sec'];
@@ -339,6 +340,22 @@ class ARC
         $this->send($command);
 
         return $this->getResponse();
+    }
+
+    /**
+     * Executes multiple commands
+     *
+     * @param array $commands Commands to be executed
+     */
+    public function commands(array $commands)
+    {
+        foreach ($commands as $command) {
+            if (!is_string($command)) {
+                continue;
+            }
+
+            $this->command($command);
+        }
     }
 
     /**
