@@ -76,19 +76,9 @@ class ARC
         $this->rconPassword = $RConPassword;
         $this->options = array_merge($this->options, $options);
 
-        if (!is_int($this->options['timeoutSec'])) {
-            throw new \Exception(
-                sprintf("Wrong option type, expected integer for 'timeoutSec', got %s", gettype($this->options['timeoutSec']))
-            );
-        }
+        $this->checkOptionTypes();
+        $this->checkForDeprecatedOptions();
 
-        if (!is_bool($this->options['sendHeartbeat'])) {
-            throw new \Exception(
-                sprintf("Wrong option type, expected boolean for 'sendHeartbeat', got %s", gettype($this->options['sendHeartbeat']))
-            );
-        }
-
-        $this->checkDeprecatedOptions();
         $this->connect();
     }
 
@@ -160,7 +150,7 @@ class ARC
     /**
      * Checks if ARC's option array contains any deprecated options
      */
-    private function checkDeprecatedOptions()
+    private function checkForDeprecatedOptions()
     {
         if (array_key_exists('timeout_sec', $this->options)) {
             @trigger_error("The 'timeout_sec' option is deprecated since version 2.1.2 and will be removed in 3.0. Use 'timeoutSec' instead.", E_USER_DEPRECATED);
@@ -169,6 +159,24 @@ class ARC
         if (array_key_exists('heartbeat', $this->options)) {
             @trigger_error("The 'heartbeat' option is deprecated since version 2.1.2 and will be removed in 3.0. Use 'sendHeartbeat' instead.", E_USER_DEPRECATED);
             $this->options['sendHeartbeat'] = $this->options['heartbeat'];
+        }
+    }
+
+    /**
+     * Checks for type issues in the option array
+     */
+    private function checkOptionTypes()
+    {
+        if (!is_int($this->options['timeoutSec'])) {
+            throw new \Exception(
+                sprintf("Expected option 'timeoutSec' to be integer, got %s", gettype($this->options['timeoutSec']))
+            );
+        }
+
+        if (!is_bool($this->options['sendHeartbeat'])) {
+            throw new \Exception(
+                sprintf("Expected option 'sendHeartbeat' to be boolean, got %s", gettype($this->options['sendHeartbeat']))
+            );
         }
     }
 
@@ -366,8 +374,15 @@ class ARC
      */
     public function kickPlayer($player, $reason = 'Admin Kick')
     {
-        if (!is_int($player) || !is_string($reason)) {
-            throw new \Exception('Wrong parameter type(s)!');
+        if (!is_int($player) && !is_string($player)) {
+            throw new \Exception(
+                sprintf('Expected parameter 1 to be string or integer, got %s', gettype($player))
+            );
+        }
+        if (!is_string($reason)) {
+            throw new \Exception(
+                sprintf('Expected parameter 2 to be string, got %s', gettype($reason))
+            );
         }
 
         $this->send("kick $player $reason");
@@ -388,7 +403,9 @@ class ARC
     public function sayGlobal($message)
     {
         if (!is_string($message)) {
-            throw new \Exception('Wrong parameter type!');
+            throw new \Exception(
+                sprintf('Expected parameter 1 to be string, got %s', gettype($message))
+            );
         }
 
         $this->send("Say -1 $message");
@@ -438,7 +455,9 @@ class ARC
     public function maxPing($ping)
     {
         if (!is_int($ping)) {
-            throw new \Exception('Wrong parameter type!');
+            throw new \Exception(
+                sprintf('Expected parameter 1 to be integer, got %s', gettype($ping))
+            );
         }
 
         $this->send("MaxPing $ping");
@@ -457,7 +476,9 @@ class ARC
     public function changePassword($password)
     {
         if (!is_string($password)) {
-            throw new \Exception('Wrong parameter type!');
+            throw new \Exception(
+                sprintf('Expected parameter 1 to be string, got %s', gettype($password))
+            );
         }
 
         $this->send("RConPassword $password");
@@ -534,7 +555,13 @@ class ARC
      */
     public function banPlayer($player, $reason = 'Banned', $time = 0)
     {
-        if (!is_string($player) || !is_string($reason) || !is_int($time)) {
+        if (!is_string($player) && !is_int($player)) {
+            throw new \Exception(
+                sprintf('Expected parameter 1 to be integer or string, got %s', gettype($player))
+            );
+        }
+
+        if (!is_string($reason) || !is_int($time)) {
             throw new \Exception('Wrong parameter type(s)!');
         }
 
@@ -567,19 +594,21 @@ class ARC
     /**
      * Removes a ban
      *
-     * @param integer $banID Ban who will be removed
+     * @param integer $banId Ban who will be removed
      *
      * @throws \Exception if wrong parameter types were passed to the function
      *
      * @return ARC
      */
-    public function removeBan($banID)
+    public function removeBan($banId)
     {
-        if (!is_int($banID)) {
-            throw new \Exception('Wrong parameter type!');
+        if (!is_int($banId)) {
+            throw new \Exception(
+                sprintf('Expected parameter 1 to be integer, got %s', gettype($banId))
+            );
         }
 
-        $this->send("removeBan $banID");
+        $this->send("removeBan $banId");
         return $this;
     }
 
