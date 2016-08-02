@@ -546,7 +546,7 @@ class ARC
      */
     public function banPlayer($player, $reason = 'Banned', $time = 0)
     {
-        if (!is_int($player) || !is_string($reason) || !is_int($time)) {
+        if (!is_string($player) || !is_string($reason) || !is_int($time)) {
             throw new \Exception('Wrong parameter type!');
         }
 
