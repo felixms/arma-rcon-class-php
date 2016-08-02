@@ -68,7 +68,7 @@ class ARC
     public function __construct($serverIP, $RConPassword, $serverPort = 2302, array $options = array())
     {
         if (!is_int($serverPort) || !is_string($RConPassword) || !is_string($serverIP)) {
-            throw new \Exception('Wrong parameter type!');
+            throw new \Exception('Wrong parameter type(s)!');
         }
 
         $this->serverIP = $serverIP;
@@ -77,11 +77,15 @@ class ARC
         $this->options = array_merge($this->options, $options);
 
         if (!is_int($this->options['timeoutSec'])) {
-            throw new \Exception("Wrong option type, 'timeoutSec' must be an integer");
+            throw new \Exception(
+                sprintf("Wrong option type, expected integer for 'timeoutSec', got %s", gettype($this->options['timeoutSec']))
+            );
         }
 
         if (!is_bool($this->options['sendHeartbeat'])) {
-            throw new \Exception("Wrong option type, 'sendHeartbeat' must be a boolean");
+            throw new \Exception(
+                sprintf("Wrong option type, expected boolean for 'sendHeartbeat', got %s", gettype($this->options['sendHeartbeat']))
+            );
         }
 
         $this->checkDeprecatedOptions();
@@ -150,7 +154,6 @@ class ARC
         }
 
         $this->connect();
-
         return $this;
     }
 
@@ -163,7 +166,6 @@ class ARC
             @trigger_error("The 'timeout_sec' option is deprecated since version 2.1.2 and will be removed in 3.0. Use 'timeoutSec' instead.", E_USER_DEPRECATED);
             $this->options['timeoutSec'] = $this->options['timeout_sec'];
         }
-
         if (array_key_exists('heartbeat', $this->options)) {
             @trigger_error("The 'heartbeat' option is deprecated since version 2.1.2 and will be removed in 3.0. Use 'sendHeartbeat' instead.", E_USER_DEPRECATED);
             $this->options['sendHeartbeat'] = $this->options['heartbeat'];
@@ -178,13 +180,11 @@ class ARC
     private function authorize()
     {
         $sent = $this->writeToSocket($this->getLoginMessage());
-
         if ($sent === false) {
             throw new \Exception('Failed to send login!');
         }
 
         $result = fread($this->socket, 16);
-
         if (@ord($result[strlen($result)-1]) == 0) {
             throw new \Exception('Login failed, wrong password or wrong port!');
         }
@@ -200,14 +200,13 @@ class ARC
         $get = function() {
             return substr(fread($this->socket, 102400), strlen($this->head));
         };
-
         $output = '';
 
         do {
             $answer = $get();
-
-            while (strpos($answer, 'RCon admin') !== false)
+            while (strpos($answer, 'RCon admin') !== false) {
                 $answer = $get();
+            }
 
             $output .= $answer;
         } while (!empty($answer));
@@ -230,11 +229,10 @@ class ARC
         if ($this->disconnected) {
             throw new \Exception('Failed to send command, because the connection is closed!');
         }
-
         $msgCRC = $this->getMsgCRC($command);
         $head = 'BE'.chr(hexdec($msgCRC[0])).chr(hexdec($msgCRC[1])).chr(hexdec($msgCRC[2])).chr(hexdec($msgCRC[3])).chr(hexdec('ff')).chr(hexdec('01')).chr(hexdec(sprintf('%01b', 0)));
-        $msg = $head.$command;
 
+        $msg = $head.$command;
         $this->head = $head;
 
         if ($this->writeToSocket($msg) === false) {
@@ -338,7 +336,6 @@ class ARC
         }
 
         $this->send($command);
-
         return $this->getResponse();
     }
 
@@ -353,7 +350,6 @@ class ARC
             if (!is_string($command)) {
                 continue;
             }
-
             $this->command($command);
         }
     }
@@ -371,7 +367,7 @@ class ARC
     public function kickPlayer($player, $reason = 'Admin Kick')
     {
         if (!is_int($player) || !is_string($reason)) {
-            throw new \Exception('Wrong parameter type!');
+            throw new \Exception('Wrong parameter type(s)!');
         }
 
         $this->send("kick $player $reason");
@@ -396,7 +392,6 @@ class ARC
         }
 
         $this->send("Say -1 $message");
-
         return $this;
     }
 
@@ -413,11 +408,10 @@ class ARC
     public function sayPlayer($player, $message)
     {
         if (!is_int($player) || !is_string($message)) {
-            throw new \Exception('Wrong parameter type!');
+            throw new \Exception('Wrong parameter type(s)!');
         }
 
         $this->send("Say $player $message");
-
         return $this;
     }
 
@@ -429,7 +423,6 @@ class ARC
     public function loadScripts()
     {
         $this->send('loadScripts');
-
         return $this;
     }
 
@@ -449,7 +442,6 @@ class ARC
         }
 
         $this->send("MaxPing $ping");
-
         return $this;
     }
 
@@ -469,7 +461,6 @@ class ARC
         }
 
         $this->send("RConPassword $password");
-
         return $this;
     }
 
@@ -481,7 +472,6 @@ class ARC
     public function loadBans()
     {
         $this->send('loadBans');
-
         return $this;
     }
 
@@ -493,7 +483,6 @@ class ARC
     public function getPlayers()
     {
         $this->send('players');
-
         return $this->getResponse();
     }
 
@@ -528,7 +517,6 @@ class ARC
     public function getMissions()
     {
         $this->send('missions');
-
         return $this->getResponse();
     }
 
@@ -536,7 +524,7 @@ class ARC
      * Ban a player's BE GUID from the server. If time is not specified or 0, the ban will be permanent;.
      * If reason is not specified the player will be kicked with the message "Banned".
      *
-     * @param integer $player Player (his #) who will be banned
+     * @param integer $player Player who will be banned
      * @param string $reason  Reason why the player is banned
      * @param integer $time   How long the player is banned in minutes (0 = permanent)
 
@@ -547,12 +535,11 @@ class ARC
     public function banPlayer($player, $reason = 'Banned', $time = 0)
     {
         if (!is_string($player) || !is_string($reason) || !is_int($time)) {
-            throw new \Exception('Wrong parameter type!');
+            throw new \Exception('Wrong parameter type(s)!');
         }
 
         $this->send("ban $player $time $reason");
         $this->reconnect();
-
         return $this;
     }
 
@@ -569,12 +556,11 @@ class ARC
      */
     public function addBan($player, $reason = 'Banned', $time = 0)
     {
-        if (!is_int($player) || !is_string($reason) || !is_int($time)) {
-            throw new \Exception('Wrong parameter type!');
+        if (!is_string($player) || !is_string($reason) || !is_int($time)) {
+            throw new \Exception('Wrong parameter type(s)!');
         }
 
         $this->send("addBan $player $time $reason");
-
         return $this;
     }
 
@@ -589,8 +575,11 @@ class ARC
      */
     public function removeBan($banID)
     {
-        $this->send("removeBan $banID");
+        if (!is_int($banID)) {
+            throw new \Exception('Wrong parameter type!');
+        }
 
+        $this->send("removeBan $banID");
         return $this;
     }
 
@@ -608,7 +597,6 @@ class ARC
         $bans = $this->cleanList($bansRaw);
 
         preg_match_all("#(\d+)\s+([0-9a-fA-F]+)\s([perm|\d]+)\s([\S ]+)$#im", $bans, $str);
-
         return $this->formatList($str);
     }
 
@@ -620,7 +608,6 @@ class ARC
     public function getBans()
     {
         $this->send('bans');
-
         return $this->getResponse();
     }
 
@@ -632,7 +619,6 @@ class ARC
     public function writeBans()
     {
         $this->send('writeBans');
-
         return $this;
     }
 
@@ -644,7 +630,6 @@ class ARC
     public function getBEServerVersion()
     {
         $this->send('version');
-
         return $this->getResponse();
     }
 

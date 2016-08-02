@@ -3,7 +3,7 @@
 [![Packagist Version](https://img.shields.io/packagist/v/nizarii/arma-rcon-class.svg)](https://packagist.org/packages/nizarii/arma-rcon-class)
 [![GitHub License](https://img.shields.io/github/license/nizarii/arma-rcon-class-php.svg)](https://github.com/Nizarii/arma-rcon-class-php/)
 
-ARC is a lightweight PHP class, which allows you connecting and sending commands easily to your **BattlEye** server, including **Arma 3**, **Arma 2** and **Arma 2: OA** game servers.
+ARC is a lightweight PHP class, that allows you connecting and sending commands easily to your **BattlEye** server, including **Arma 3**, **Arma 2** and **Arma 2: OA** game servers.
 <br>
 <br>
 ## Requirements
@@ -37,9 +37,9 @@ $rcon = new ARC(string $ServerIP, string $RConPassword [, int $Port = 2302 [, ar
 You are able to send commands with the `command()` function
 ```php
 //...
-$rcon->command("YourCommand");
+$rcon->command('YourCommand');
 ```
-ARC will throw `Exceptions` if anything goes wrong, so you can do a try-catch function
+ARC will throw `Exceptions` if anything goes wrong, so you might want to catch it
 ```php
 use \Nizarii\ARC;
 
