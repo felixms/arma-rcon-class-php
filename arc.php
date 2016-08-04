@@ -7,7 +7,7 @@
  * @copyright 2016 Felix Schäfer
  * @license   MIT-License
  * @link      https://github.com/Nizarii/arma-rcon-php-class Github repository of ARC
- * @version   2.1.2
+ * @version   2.1.3
  *
  *  For the full copyright and license information, please view the LICENSE
  *  file that was distributed with this source code.
@@ -68,7 +68,7 @@ class ARC
     public function __construct($serverIP, $RConPassword, $serverPort = 2302, array $options = array())
     {
         if (!is_int($serverPort) || !is_string($RConPassword) || !is_string($serverIP)) {
-            throw new \Exception('Wrong parameter type(s)!');
+            throw new \Exception('Wrong constructor parameter type(s)!');
         }
 
         $this->serverIP = $serverIP;
@@ -98,7 +98,6 @@ class ARC
         if ($this->disconnected) {
             return;
         }
-
         fclose($this->socket);
 
         $this->socket = null;
@@ -117,7 +116,6 @@ class ARC
         }
 
         $this->socket = @fsockopen("udp://$this->serverIP", $this->serverPort, $errno, $errstr, $this->options['timeoutSec']);
-
         if (!$this->socket) {
             throw new \Exception('Failed to create socket!');
         }
@@ -126,9 +124,8 @@ class ARC
         stream_set_blocking($this->socket, true);
 
         $this->authorize();
-
         $this->disconnected = false;
-
+        
         if ($this->options['sendHeartbeat']) {
             $this->sendHeartbeat();
         }
@@ -171,9 +168,7 @@ class ARC
             throw new \Exception(
                 sprintf("Expected option 'timeoutSec' to be integer, got %s", gettype($this->options['timeoutSec']))
             );
-        }
-
-        if (!is_bool($this->options['sendHeartbeat'])) {
+        } elseif (!is_bool($this->options['sendHeartbeat'])) {
             throw new \Exception(
                 sprintf("Expected option 'sendHeartbeat' to be boolean, got %s", gettype($this->options['sendHeartbeat']))
             );
@@ -208,8 +203,8 @@ class ARC
         $get = function() {
             return substr(fread($this->socket, 102400), strlen($this->head));
         };
+        
         $output = '';
-
         do {
             $answer = $get();
             while (strpos($answer, 'RCon admin') !== false) {
@@ -567,6 +562,7 @@ class ARC
 
         $this->send("ban $player $time $reason");
         $this->reconnect();
+        
         return $this;
     }
 
@@ -676,7 +672,6 @@ class ARC
     {
         // Remove first array
         array_shift($str);
-
         // Create return array
         $result = array();
 
