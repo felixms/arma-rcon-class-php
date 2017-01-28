@@ -499,7 +499,10 @@ class ARC
     public function getPlayers()
     {
         $this->send('players');
-        return $this->getResponse();
+        $result = $this->getResponse();
+        
+        $this->reconnect();
+        return $result;
     }
 
     /**
@@ -520,6 +523,7 @@ class ARC
         preg_match_all("#(\d+)\s+(\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+\b)\s+(\d+)\s+([0-9a-fA-F]+)\(\w+\)\s([\S ]+)$#im", $players, $str);
         $result = $this->formatList($str);
 
+        $this->reconnect();
         return $result;
     }
 
