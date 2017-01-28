@@ -4,10 +4,10 @@
  * ARC is a lightweight class, helping you to send commands to your ARMA server via RCon.
  *
  * @author    Felix Schäfer
- * @copyright 2016 Felix Schäfer
+ * @copyright 2017 Felix Schäfer
  * @license   MIT-License
  * @link      https://github.com/Nizarii/arma-rcon-php-class Github repository of ARC
- * @version   2.1.3
+ * @version   2.1.4
  *
  *  For the full copyright and license information, please view the LICENSE
  *  file that was distributed with this source code.
