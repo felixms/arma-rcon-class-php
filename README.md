@@ -1,6 +1,8 @@
 # Arma RCon Class (ARC) 1.3 for PHP 
 
 ARC is a lightweight PHP class, which let's you easily send commands via  RCon to your Arma server. See "Supported Server" for a full list of supported Arma games.
+
+ __*This version of ARC is deprecated, please use v2!*__
 <br>
 <br>
 ## Supported Servers
