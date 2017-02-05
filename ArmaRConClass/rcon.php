@@ -8,7 +8,7 @@
  * @since    September 26, 2015
  * @link     https://github.com/Nizarii/arma-rcon-php-class
  * @license  MIT-License
- * @version  1.3.6
+ * @version  1.3.7
  *
  */
 
@@ -415,7 +415,9 @@ class ARC {
      */
     public function get_players()
     {
-        return $this->send("players") ? $this->get_answer() : false;
+        $response = $this->send("players") ? $this->get_answer() : false;
+        $this->reconnect();
+        return $response;
     }
     
 
@@ -505,5 +507,3 @@ class ARC {
 class PacketException extends \Exception {}
 class SocketException extends \Exception {}
 class AuthorizationException extends \Exception {}
-
-
