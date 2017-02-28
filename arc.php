@@ -563,6 +563,7 @@ class ARC
         }
 
         $this->send("ban $player $time $reason");
+        $this->writeBans();
         $this->reconnect();
         
         return $this;
@@ -586,6 +587,7 @@ class ARC
         }
 
         $this->send("addBan $player $time $reason");
+        $this->writeBans();
         return $this;
     }
 
@@ -607,6 +609,7 @@ class ARC
         }
 
         $this->send("removeBan $banId");
+        $this->writeBans();
         return $this;
     }
 
