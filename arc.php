@@ -23,7 +23,7 @@ class ARC
     private $options = [
         'sendHeartbeat' => false,
         'timeoutSec'    => 1,
-        'autosavebans'  => false,
+        'autosaveBans'  => false,
     ];
 
     /**
@@ -126,10 +126,6 @@ class ARC
 
         $this->authorize();
         $this->disconnected = false;
-        
-        if ($this->options['sendHeartbeat']) {
-            $this->sendHeartbeat();
-        }
     }
 
     /**
@@ -154,14 +150,13 @@ class ARC
             @trigger_error("The 'timeout_sec' option is deprecated since version 2.1.2 and will be removed in 3.0. Use 'timeoutSec' instead.", E_USER_DEPRECATED);
             $this->options['timeoutSec'] = $this->options['timeout_sec'];
         }
-        if (array_key_exists('heartbeat', $this->options)) {
-            @trigger_error("The 'heartbeat' option is deprecated since version 2.1.2 and will be removed in 3.0. Use 'sendHeartbeat' instead.", E_USER_DEPRECATED);
-            $this->options['sendHeartbeat'] = $this->options['heartbeat'];
+        if (array_key_exists('heartbeat', $this->options) || array_key_exists('sendHeartbeat', $this->options)) {
+            @trigger_error("Sending a heartbeat packet is deprecated since version 2.2.", E_USER_DEPRECATED);
         }
     }
 
     /**
-     * Checks for type issues in the option array
+     * Validate all option types
      */
     private function checkOptionTypes()
     {
@@ -169,9 +164,15 @@ class ARC
             throw new \Exception(
                 sprintf("Expected option 'timeoutSec' to be integer, got %s", gettype($this->options['timeoutSec']))
             );
-        } elseif (!is_bool($this->options['sendHeartbeat'])) {
+        } 
+        if (!is_bool($this->options['sendHeartbeat'])) {
             throw new \Exception(
                 sprintf("Expected option 'sendHeartbeat' to be boolean, got %s", gettype($this->options['sendHeartbeat']))
+            );
+        }
+         if (!is_bool($this->options['autosaveBans'])) {
+            throw new \Exception(
+                sprintf("Expected option 'autosaveBans' to be boolean, got %s", gettype($this->options['autosaveBans']))
             );
         }
     }
@@ -297,21 +298,6 @@ class ARC
         $loginMsg .= chr(hexdec('ff')).chr(hexdec('00')).$this->rconPassword;
 
         return $loginMsg;
-    }
-
-    /**
-     * Sends a heartbeat packet to the server
-     *
-     * @throws \Exception if sending the command fails
-     */
-    private function sendHeartbeat()
-    {
-        $hbMsg = 'BE'.chr(hexdec('7d')).chr(hexdec('8f')).chr(hexdec('ef')).chr(hexdec('73'));
-        $hbMsg .= chr(hexdec('ff')).chr(hexdec('02')).chr(hexdec('00'));
-
-        if ($this->writeToSocket($hbMsg) === false) {
-            throw new \Exception('Failed to send heartbeat packet!');
-        }
     }
 
     /**
