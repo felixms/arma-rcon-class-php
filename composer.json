@@ -2,7 +2,7 @@
   "name": "nizarii/arma-rcon-class",
   "homepage": "https://github.com/Nizarii/arma-rcon-class-php/",
   "type": "library",
-  "description": "ARC allows you connecting and sending commands easily to your BattlEye server",
+  "description": "ARC is a lightweight PHP class, that allows you connecting and sending commands easily to your BattlEye server, including Arma 3, Arma 2 and Arma 2: OA game servers.",
   "require": {
     "php": ">=5.4.0"
   },
@@ -10,7 +10,6 @@
   "authors": [
     {
       "name": "Felix Schäfer",
-      "email": "nizari@starwolf-dev.com",
       "role": "Developer"
     }
   ],
