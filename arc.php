@@ -23,6 +23,7 @@ class ARC
     private $options = [
         'sendHeartbeat' => false,
         'timeoutSec'    => 1,
+        'autosavebans'  => false,
     ];
 
     /**
@@ -565,6 +566,10 @@ class ARC
         $this->send("ban $player $time $reason");
         $this->reconnect();
         
+        if ($this->options['autosavebans']) {
+            $this->writeBans();
+        }
+
         return $this;
     }
 
@@ -586,6 +591,11 @@ class ARC
         }
 
         $this->send("addBan $player $time $reason");
+        
+        if ($this->options['autosavebans']) {
+            $this->writeBans();
+        }
+        
         return $this;
     }
 
@@ -607,6 +617,11 @@ class ARC
         }
 
         $this->send("removeBan $banId");
+       
+        if ($this->options['autosavebans']) {
+            $this->writeBans();
+        }
+        
         return $this;
     }
 

@@ -66,6 +66,7 @@ try {
 Options can be passed to ARC as an array via the fourth parameter of the constructor. The following options are currently available:
 * `bool sendHeartbeat = false`: Sends a heartbeat packet to the server *(will be deprecated in v2.2)*.
 * `int timeoutSec = 1`: Sets a timeout value on the connection.
+* `bool autosavebans = false`: Auto save bans.txt when an player is banned or unbanned.
 
 *Suggestions for new options are always welcome!* :+1: <br>
 
