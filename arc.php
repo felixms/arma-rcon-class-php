@@ -7,7 +7,7 @@
  * @copyright 2017 Felix Schäfer
  * @license   MIT-License
  * @link      https://github.com/Nizarii/arma-rcon-php-class Github repository of ARC
- * @version   2.1.4
+ * @version   2.1.5
  *
  *  For the full copyright and license information, please view the LICENSE
  *  file that was distributed with this source code.
@@ -521,10 +521,8 @@ class ARC
 
         $players = $this->cleanList($playersRaw);
         preg_match_all("#(\d+)\s+(\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+\b)\s+(\d+)\s+([0-9a-fA-F]+)\(\w+\)\s([\S ]+)$#im", $players, $str);
-        $result = $this->formatList($str);
-
-        $this->reconnect();
-        return $result;
+        
+        return $this->formatList($str);
     }
 
     /**
