@@ -1,8 +1,8 @@
 # Arma RCon Class (ARC) 1.3 for PHP 
 
+### Attention: This version is deprecated and is no longer maintained! Please consider using the [latest](https://github.com/Nizarii/arma-rcon-class-php/tree/master) version.
 ARC is a lightweight PHP class, which let's you easily send commands via  RCon to your Arma server. See "Supported Server" for a full list of supported Arma games.
 
- __*This version of ARC is deprecated, please use v2!*__
 <br>
 <br>
 ## Supported Servers
@@ -16,7 +16,7 @@ Please consider that mods normally don't change the BattlEye server settings, so
 
 <br>
 ## Requirements
-ARC only requires **PHP 5.3**, nothing more!
+ARC only requires **PHP 5.3**!
 <br>
 <br>
 ## Installation 
