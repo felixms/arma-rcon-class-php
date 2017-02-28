@@ -1,4 +1,4 @@
-# Arma RCon Class (ARC) 2.1 for PHP 
+# Arma RCon Class (ARC) 2.2 for PHP 
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f42d50a9693b4febb34fab3f68315365)](https://www.codacy.com/app/nizari/arma-rcon-class-php?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Nizarii/arma-rcon-class-php&amp;utm_campaign=Badge_Grade)
 [![Packagist Version](https://img.shields.io/packagist/v/nizarii/arma-rcon-class.svg)](https://packagist.org/packages/nizarii/arma-rcon-class)
 [![GitHub License](https://img.shields.io/github/license/nizarii/arma-rcon-class-php.svg)](https://github.com/Nizarii/arma-rcon-class-php/)
@@ -7,7 +7,7 @@ ARC is a lightweight PHP class, that allows you connecting and sending commands 
 <br>
 <br>
 ## Requirements
-ARC 2.1 only requires **PHP 5.4** or higher!
+ARC 2.2 only requires **PHP 5.4** or higher!
 <br>
 <br>
 ## Installation 
@@ -64,9 +64,8 @@ try {
 <br><br>
 #### Options
 Options can be passed to ARC as an array via the fourth parameter of the constructor. The following options are currently available:
-* `bool sendHeartbeat = false`: Sends a heartbeat packet to the server *(will be deprecated in v2.2)*.
 * `int timeoutSec = 1`: Sets a timeout value on the connection.
-* `bool autosavebans = false`: Auto save bans.txt when an player is banned or unbanned.
+* `bool autosavebans = false`: Automatically saves bans.txt after a player is banned or unbanned.
 
 *Suggestions for new options are always welcome!* :+1: <br>
 
