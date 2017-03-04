@@ -7,7 +7,7 @@
  * @copyright 2017 Felix Schäfer
  * @license   MIT-License
  * @link      https://github.com/Nizarii/arma-rcon-php-class Github repository of ARC
- * @version   2.1.5
+ * @version   2.2
  *
  *  For the full copyright and license information, please view the LICENSE
  *  file that was distributed with this source code.
@@ -21,9 +21,8 @@ class ARC
      * @var array Options for ARC stored in an array
      */
     private $options = [
-        'sendHeartbeat' => false,
         'timeoutSec'    => 1,
-        'autosaveBans'  => false,
+        'autosaveBans'  => false
     ];
 
     /**
