@@ -164,12 +164,7 @@ class ARC
                 sprintf("Expected option 'timeoutSec' to be integer, got %s", gettype($this->options['timeoutSec']))
             );
         } 
-        if (!is_bool($this->options['sendHeartbeat'])) {
-            throw new \Exception(
-                sprintf("Expected option 'sendHeartbeat' to be boolean, got %s", gettype($this->options['sendHeartbeat']))
-            );
-        }
-         if (!is_bool($this->options['autosaveBans'])) {
+        if (!is_bool($this->options['autosaveBans'])) {
             throw new \Exception(
                 sprintf("Expected option 'autosaveBans' to be boolean, got %s", gettype($this->options['autosaveBans']))
             );
