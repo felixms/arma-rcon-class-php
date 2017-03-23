@@ -21,7 +21,7 @@ Now require and install ARC.
 $ composer require nizarii/arma-rcon-class
 $ composer install
 ```
-<br>
+
 #### Without Composer
 Choose a [release](https://github.com/Nizarii/arma-rcon-class-php/releases) and include ARC in your project: `require_once 'arc.php';`.
 <br>
