@@ -79,7 +79,6 @@ $rcon = new ARC('127.0.0.1', 'RConPassword', 2322, [
     
 //...
 ```
-<br>
 ## Functions
 ARC features many functions to send BattlEye commands easier. After creating a new connections as explained above, you are able to use any of these functions:
 * `string command(string $command)`:  Sends any command to the BattlEye server.
