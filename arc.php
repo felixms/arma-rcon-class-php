@@ -546,7 +546,7 @@ class ARC
         $this->send("ban $player $time $reason");
         $this->reconnect();
         
-        if ($this->options['autosavebans']) {
+        if ($this->options['autosaveBans']) {
             $this->writeBans();
         }
 
@@ -572,7 +572,7 @@ class ARC
 
         $this->send("addBan $player $time $reason");
         
-        if ($this->options['autosavebans']) {
+        if ($this->options['autosaveBans']) {
             $this->writeBans();
         }
         
@@ -598,7 +598,7 @@ class ARC
 
         $this->send("removeBan $banId");
        
-        if ($this->options['autosavebans']) {
+        if ($this->options['autosaveBans']) {
             $this->writeBans();
         }
         
