@@ -435,9 +435,12 @@ class ARC
                 sprintf('Expected parameter 1 to be integer, got %s', gettype($ping))
             );
         }
-
-        $this->send("MaxPing $ping");
-        return $this;
+        
+        //https://forums.bistudio.com/forums/topic/189406-battleyes-rcon-changes-after-158135170-builds/?do=findComment&comment=3015979
+        return "Ping detection currently not working, MaxPing command disabled";
+        
+        //$this->send("MaxPing $ping");
+        //return $this;
     }
 
     /**
