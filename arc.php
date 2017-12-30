@@ -656,6 +656,112 @@ class ARC
     }
 
     /**
+    * Get socket and continue streaming.
+    *
+    * @author steffalon (https://github.com/steffalon)
+    * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
+    * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
+    * 
+    * @param integer $int   Number of loops through this funtion. By default, (-1) for no ending. 
+    * @param boolean $debug Useful boolean for debugging. By defult, (false).
+    *
+    * @return boolean
+    */
+    public function getSocketStream($int = -1, $debug = false)
+    {
+        $end = 0; //use this varible as sequence and loop ending.
+        while ($end !== $int)
+        {
+            $msg = fread($this->socket, 9000);
+            echo preg_replace("/\r|\n/", "", substr($msg, 9)).PHP_EOL;
+            $timeout = stream_get_meta_data($this->socket);
+            if ($timeout['timed_out']) {
+                $this->keepAlive($debug);
+            } else {
+                $responseCode = unpack('H*', $msg); //Make message usefull for battleye packet by unpacking it to hexbyte.
+                $responseCode = str_split(substr($responseCode[1], 12), 2); //Get important hexbytes.
+                switch ($responseCode[1]) { //See https://www.battleye.com/downloads/BERConProtocol.txt for packet info.
+                    case "00": //Login WILL NOT BE USED IN THIS LOOP!
+                        if ($responseCode[2] == "01") { //Login successful.
+                            echo "Accepted BERCon login.".PHP_EOL;
+                        } else { //Otherwise $responseCode[2] == "0x00" (Login failed)
+                            echo "Invalid BERCon login details. This process is getting stopped.".PHP_EOL;
+                            break 2;
+                        }
+                        break;
+                    case "01": //Send commands by this client.
+                        if (count($responseCode) == 3) {
+                            break;
+                        }
+                        if ($responseCode[3] !== "00") {
+                            if ($debug) echo "This is a small package.".PHP_EOL; //This package is not special. Allow to be continued.
+                        } else {
+                            if ($debug) echo "Multi-packet.".PHP_EOL;
+                            // if (debug) var_dump($responseCode); //Useful developer information.
+                            // if ($responseCode[5] == "00") {
+                            //     $getAmount = $responseCode[4];
+                            //     if (debug) var_dump($getAmount);
+                            // }
+                        }
+                        break;
+                    case "02": //acknowledge as client.
+                        $end = $this->acknowledge($end, $debug);
+                        break;
+                }
+            }
+        }
+        $this->disconnect(); // runs if process is done.
+        return true; // Completed
+    }
+
+    /**
+    * Acknowledge the data and add +1 to sequence.
+    *
+    * @author steffalon (https://github.com/steffalon)
+    * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
+    * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
+    * 
+    * @throws \Exception if failed to send a command
+    * 
+    * @return int
+    */
+    private function acknowledge($int, $debug = false) {
+        if ($debug) echo "Acknowledge!".PHP_EOL;  
+        $needBuffer = chr(hexdec('ff')).chr(hexdec('02')).chr(hexdec(sprintf('%2X', $int)));
+        $needBuffer = hash("crc32b", $needBuffer);
+        $needBuffer = str_split($needBuffer, 2);
+        $needBuffer = array_reverse($needBuffer);
+        $statusmsg = "BE".chr(hexdec($needBuffer[0])).chr(hexdec($needBuffer[1])).chr(hexdec($needBuffer[2])).chr(hexdec($needBuffer[3]));
+        $statusmsg .= chr(hexdec('ff')).chr(hexdec('02')).chr(hexdec(sprintf('%2X', $int)));
+        if ($this->writeToSocket($statusmsg) === false) {
+            throw new \Exception('Failed to send command!');
+        }
+        return ++$int; //sequence +1
+    }
+
+    /**
+    * Keep the stream alive. Send package to BE server. Use this function before 45 seconds.
+    *
+    * @author steffalon (https://github.com/steffalon)
+    * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
+    * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
+    *
+    * @throws \Exception if failed to send a command
+    *
+    * @return boolean
+    */
+    private function keepAlive($debug = false) {
+        if ($debug) echo '--Keep connection alive--'.PHP_EOL;
+        $keepalive = "BE".chr(hexdec("be")).chr(hexdec("dc")).chr(hexdec("c2")).chr(hexdec("58"));
+        $keepalive .= chr(hexdec('ff')).chr(hexdec('01')).chr(hexdec(sprintf('00')));
+        if ($this->writeToSocket($keepalive) === false) {
+            throw new \Exception('Failed to send command!');
+            return false; // Failed
+        }
+        return true; // Completed
+    }
+    
+    /**
      * Converts BE text "array" list to array
      *
      * @author nerdalertdk (https://github.com/nerdalertdk)
