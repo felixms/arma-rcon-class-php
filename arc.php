@@ -662,15 +662,15 @@ class ARC
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
     *
-    * @param integer $int   Number of loops through this funtion. By default, (-1) for no ending.
+    * @param integer $loop  Number of loops through this funtion. By default, (-1) for no ending.
     * @param boolean $debug Useful boolean for debugging. By defult, (false).
     *
     * @return boolean
     */
-    public function getSocketStream($int = -1, $debug = false)
+    public function getSocketStream($loop = -1, $debug = false)
     {
-        $end = 0; //use this varible as sequence and loop ending.
-        while ($end !== $int) {
+        $end = 0; // Use this varible as sequence and loop ending.
+        while ($end !== $loop) {
             $msg = fread($this->socket, 9000);
             if ($debug) {
                 echo preg_replace("/\r|\n/", "", substr($msg, 9)).PHP_EOL;
@@ -679,26 +679,26 @@ class ARC
             if ($timeout['timed_out']) {
                 $this->keepAlive($debug);
             } else {
-                $responseCode = unpack('H*', $msg); //Make message usefull for battleye packet by unpacking it to hexbyte.
-                $responseCode = str_split(substr($responseCode[1], 12), 2); //Get important hexbytes.
-                switch ($responseCode[1]) { //See https://www.battleye.com/downloads/BERConProtocol.txt for packet info.
-                    case "00": //Login WILL NOT BE USED IN THIS LOOP!
-                        if ($responseCode[2] == "01") { //Login successful.
+                $responseCode = unpack('H*', $msg); // Make message usefull for battleye packet by unpacking it to hexbyte.
+                $responseCode = str_split(substr($responseCode[1], 12), 2); // Get important hexbytes.
+                switch ($responseCode[1]) { // See https://www.battleye.com/downloads/BERConProtocol.txt for packet info.
+                    case "00": // Login WILL NOT BE USED IN THIS LOOP!
+                        if ($responseCode[2] == "01") { // Login successful.
                             if ($debug) {
                                 echo "Accepted BERCon login.".PHP_EOL;
                             }
-                        } else { //Otherwise $responseCode[2] == "0x00" (Login failed)
+                        } else { // Otherwise $responseCode[2] == "0x00" (Login failed)
                             if ($debug) {
                                 echo "Invalid BERCon login details. This process is getting stopped.".PHP_EOL;
                             }
                             break 2;
                         }
                         break;
-                    case "01": //Send commands by this client.
+                    case "01": // Send commands by this client.
                         if (count($responseCode) == 3) {
                             break;
                         }
-                        if ($responseCode[3] !== "00") { //This package is small.
+                        if ($responseCode[3] !== "00") { // This package is small.
                             if ($debug) {
                                 echo "This is a small package.".PHP_EOL;
                             }
@@ -713,13 +713,13 @@ class ARC
                             // }
                         }
                         break;
-                    case "02": //acknowledge as client.
+                    case "02": // Acknowledge as client.
                         $end = $this->acknowledge($end, $debug);
                         break;
                 }
             }
         }
-        $this->disconnect(); // runs if process is done.
+        $this->disconnect(); // Runs if process is done.
         return true; // Completed
     }
 
@@ -730,9 +730,12 @@ class ARC
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
     *
+    * @param integer $int   Sequence number. Makes a new header with that number.
+    * @param boolean $debug Useful boolean for debugging. By defult, (false).
+    *
     * @throws \Exception if failed to send a command
     *
-    * @return int
+    * @return integer
     */
     private function acknowledge($int, $debug = false)
     {
@@ -757,6 +760,8 @@ class ARC
     * @author steffalon (https://github.com/steffalon)
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
+    *
+    * @param boolean $debug Useful boolean for debugging. By defult, (false).
     *
     * @throws \Exception if failed to send a command
     *
