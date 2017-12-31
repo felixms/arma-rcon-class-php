@@ -163,7 +163,7 @@ class ARC
             throw new \Exception(
                 sprintf("Expected option 'timeoutSec' to be integer, got %s", gettype($this->options['timeoutSec']))
             );
-        } 
+        }
         if (!is_bool($this->options['autosaveBans'])) {
             throw new \Exception(
                 sprintf("Expected option 'autosaveBans' to be boolean, got %s", gettype($this->options['autosaveBans']))
@@ -661,8 +661,8 @@ class ARC
     * @author steffalon (https://github.com/steffalon)
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
-    * 
-    * @param integer $int   Number of loops through this funtion. By default, (-1) for no ending. 
+    *
+    * @param integer $int   Number of loops through this funtion. By default, (-1) for no ending.
     * @param boolean $debug Useful boolean for debugging. By defult, (false).
     *
     * @return boolean
@@ -670,10 +670,11 @@ class ARC
     public function getSocketStream($int = -1, $debug = false)
     {
         $end = 0; //use this varible as sequence and loop ending.
-        while ($end !== $int)
-        {
+        while ($end !== $int) {
             $msg = fread($this->socket, 9000);
-            echo preg_replace("/\r|\n/", "", substr($msg, 9)).PHP_EOL;
+            if ($debug) {
+                echo preg_replace("/\r|\n/", "", substr($msg, 9)).PHP_EOL;
+            }
             $timeout = stream_get_meta_data($this->socket);
             if ($timeout['timed_out']) {
                 $this->keepAlive($debug);
@@ -683,9 +684,13 @@ class ARC
                 switch ($responseCode[1]) { //See https://www.battleye.com/downloads/BERConProtocol.txt for packet info.
                     case "00": //Login WILL NOT BE USED IN THIS LOOP!
                         if ($responseCode[2] == "01") { //Login successful.
-                            echo "Accepted BERCon login.".PHP_EOL;
+                            if ($debug) {
+                                echo "Accepted BERCon login.".PHP_EOL;
+                            }
                         } else { //Otherwise $responseCode[2] == "0x00" (Login failed)
-                            echo "Invalid BERCon login details. This process is getting stopped.".PHP_EOL;
+                            if ($debug) {
+                                echo "Invalid BERCon login details. This process is getting stopped.".PHP_EOL;
+                            }
                             break 2;
                         }
                         break;
@@ -693,10 +698,14 @@ class ARC
                         if (count($responseCode) == 3) {
                             break;
                         }
-                        if ($responseCode[3] !== "00") {
-                            if ($debug) echo "This is a small package.".PHP_EOL; //This package is not special. Allow to be continued.
+                        if ($responseCode[3] !== "00") { //This package is small.
+                            if ($debug) {
+                                echo "This is a small package.".PHP_EOL;
+                            }
                         } else {
-                            if ($debug) echo "Multi-packet.".PHP_EOL;
+                            if ($debug) { //This package is multi-packet.
+                                echo "Multi-packet.".PHP_EOL;
+                            }
                             // if (debug) var_dump($responseCode); //Useful developer information.
                             // if ($responseCode[5] == "00") {
                             //     $getAmount = $responseCode[4];
@@ -720,13 +729,16 @@ class ARC
     * @author steffalon (https://github.com/steffalon)
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
-    * 
+    *
     * @throws \Exception if failed to send a command
-    * 
+    *
     * @return int
     */
-    private function acknowledge($int, $debug = false) {
-        if ($debug) echo "Acknowledge!".PHP_EOL;  
+    private function acknowledge($int, $debug = false)
+    {
+        if ($debug) {
+            echo "Acknowledge!".PHP_EOL;
+        }
         $needBuffer = chr(hexdec('ff')).chr(hexdec('02')).chr(hexdec(sprintf('%2X', $int)));
         $needBuffer = hash("crc32b", $needBuffer);
         $needBuffer = str_split($needBuffer, 2);
@@ -750,8 +762,11 @@ class ARC
     *
     * @return boolean
     */
-    private function keepAlive($debug = false) {
-        if ($debug) echo '--Keep connection alive--'.PHP_EOL;
+    private function keepAlive($debug = false)
+    {
+        if ($debug) {
+            echo '--Keep connection alive--'.PHP_EOL;
+        }
         $keepalive = "BE".chr(hexdec("be")).chr(hexdec("dc")).chr(hexdec("c2")).chr(hexdec("58"));
         $keepalive .= chr(hexdec('ff')).chr(hexdec('01')).chr(hexdec(sprintf('00')));
         if ($this->writeToSocket($keepalive) === false) {
@@ -760,7 +775,7 @@ class ARC
         }
         return true; // Completed
     }
-    
+
     /**
      * Converts BE text "array" list to array
      *
