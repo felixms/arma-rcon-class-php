@@ -102,6 +102,7 @@ ARC features many functions to send BattlEye commands easier. After creating a n
 * `disconnect()`: Closes the current connection.
 * `object reconnect()`: Closes the current connection & creates a new one.
 * `resource getSocket()`: Get the socket, which is used by ARC to send commands to the server.
+* `boolean getSocketStream(int $int, boolean $debug)`: Get constant socket stream. $int = numbers of socket data until exiting the method. It is not required to fill variables by calling this function. Default setting: getSocketStream(-1, false).
 
 *See [here](https://community.bistudio.com/wiki/BattlEye#RCon_commands "BattlEye Wiki") for more information about BattlEye commands*
 <br>
