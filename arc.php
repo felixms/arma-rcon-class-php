@@ -748,7 +748,7 @@ class ARC
         if ($this->writeToSocket($statusmsg) === false) {
             throw new \Exception('Failed to send command!');
         }
-        return ++$int; //sequence +1
+        return ++$int; // Sequence +1
     }
 
     /**
