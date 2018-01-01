@@ -662,14 +662,18 @@ class ARC
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
     *
-    * @param integer $loop  Number of loops through this funtion. By default, (-1) for no ending.
-    * @param boolean $debug Useful boolean for debugging. By defult, (false).
+    * @param integer $loop      Number of loops through this funtion. By default, (-1) for no ending.
+    * @param boolean $closeCon  After done looping, close connection or not. By default, false. If on false, client doesn't have to reconnect when calling a command.
+    * @param boolean $debug     Useful boolean for debugging. By default, (false).
     *
     * @return boolean
     */
-    public function getSocketStream($loop = -1, $debug = false)
+    public function getSocketStream($loop = -1, $closeCon = false, $debug = false)
     {
-        $end = 0; // Use this varible as sequence and loop ending.
+        static $end; // Use this varible as sequence and loop ending.
+        if ($end !== null) {
+            $loop = $end + $loop;
+        }
         while ($end !== $loop) {
             $msg = fread($this->socket, 9000);
             if ($debug) {
@@ -719,7 +723,10 @@ class ARC
                 }
             }
         }
-        $this->disconnect(); // Runs if process is done.
+        if ($closeCon) {
+            $end = 0;
+            $this->disconnect(); // Runs if process is done and $closeCon is enabled.
+        }
         return true; // Completed
     }
 
