@@ -22,7 +22,8 @@ class ARC
      */
     private $options = [
         'timeoutSec'    => 1,
-        'autosaveBans'  => false
+        'autosaveBans'  => false,
+        'debug'         => false
     ];
 
     /**
@@ -54,6 +55,11 @@ class ARC
      * @var string Head of the message, which was sent to the server
      */
     private $head;
+
+    /**
+     * @var int Sequence number and also a helper to end loops.
+     */
+    private $end = 0; // required to remember the sequence.
 
     /**
      * Class constructor
@@ -167,6 +173,11 @@ class ARC
         if (!is_bool($this->options['autosaveBans'])) {
             throw new \Exception(
                 sprintf("Expected option 'autosaveBans' to be boolean, got %s", gettype($this->options['autosaveBans']))
+            );
+        }
+        if (!is_bool($this->options['debug'])) {
+            throw new \Exception(
+                sprintf("Expected option 'debug' to be boolean, got %s", gettype($this->options['debug']))
             );
         }
     }
@@ -656,78 +667,120 @@ class ARC
     }
 
     /**
-    * Get socket and continue streaming.
+    * Get socket and continue streaming and disconnect after looping.
     *
     * @author steffalon (https://github.com/steffalon)
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
     *
     * @param integer $loop      Number of loops through this funtion. By default, (-1) for no ending.
-    * @param boolean $closeCon  After done looping, close connection or not. By default, false. If on false, client doesn't have to reconnect when calling a command.
-    * @param boolean $debug     Useful boolean for debugging. By default, (false).
     *
     * @return boolean
     */
-    public function getSocketStream($loop = -1, $closeCon = false, $debug = false)
+    public function socketLoopClose($loop = -1)
     {
-        static $end; // Use this varible as sequence and loop ending.
-        if ($end !== null) {
-            $loop = $end + $loop;
+        if ($this->end !== null) {
+            $loop = $this->end + $loop;
         }
-        while ($end !== $loop) {
+        while ($this->end !== $loop) {
             $msg = fread($this->socket, 9000);
-            if ($debug) {
+            if ($this->options['debug']) {
                 echo preg_replace("/\r|\n/", "", substr($msg, 9)).PHP_EOL;
             }
             $timeout = stream_get_meta_data($this->socket);
             if ($timeout['timed_out']) {
-                $this->keepAlive($debug);
+                $this->keepAlive();
             } else {
-                $responseCode = unpack('H*', $msg); // Make message usefull for battleye packet by unpacking it to hexbyte.
-                $responseCode = str_split(substr($responseCode[1], 12), 2); // Get important hexbytes.
-                switch ($responseCode[1]) { // See https://www.battleye.com/downloads/BERConProtocol.txt for packet info.
-                    case "00": // Login WILL NOT BE USED IN THIS LOOP!
-                        if ($responseCode[2] == "01") { // Login successful.
-                            if ($debug) {
-                                echo "Accepted BERCon login.".PHP_EOL;
-                            }
-                        } else { // Otherwise $responseCode[2] == "0x00" (Login failed)
-                            if ($debug) {
-                                echo "Invalid BERCon login details. This process is getting stopped.".PHP_EOL;
-                            }
-                            break 2;
-                        }
-                        break;
-                    case "01": // Send commands by this client.
-                        if (count($responseCode) == 3) {
-                            break;
-                        }
-                        if ($responseCode[3] !== "00") { // This package is small.
-                            if ($debug) {
-                                echo "This is a small package.".PHP_EOL;
-                            }
-                        } else {
-                            if ($debug) { //This package is multi-packet.
-                                echo "Multi-packet.".PHP_EOL;
-                            }
-                            // if (debug) var_dump($responseCode); //Useful developer information.
-                            // if ($responseCode[5] == "00") {
-                            //     $getAmount = $responseCode[4];
-                            //     if (debug) var_dump($getAmount);
-                            // }
-                        }
-                        break;
-                    case "02": // Acknowledge as client.
-                        $end = $this->acknowledge($end, $debug);
-                        break;
-                }
+                $this->end = $this->readPackage($msg);
             }
         }
-        if ($closeCon) {
-            $end = 0;
-            $this->disconnect(); // Runs if process is done and $closeCon is enabled.
+        $this->end = 0;
+        $this->disconnect();
+        return true; // Completed
+    }
+
+    /**
+    * Get socket and continue streaming and don't disconnect after looping.
+    *
+    * @author steffalon (https://github.com/steffalon)
+    * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
+    * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
+    *
+    * @param integer $loop      Number of loops through this funtion. By default, (-1) for no ending.
+    *
+    * @return boolean
+    */
+    public function socketLoop($loop = -1)
+    {
+        if ($this->end !== null) {
+            $loop = $this->end + $loop;
+        }
+        while ($this->end !== $loop) {
+            $msg = fread($this->socket, 9000);
+            if ($this->options['debug']) {
+                echo preg_replace("/\r|\n/", "", substr($msg, 9)).PHP_EOL;
+            }
+            $timeout = stream_get_meta_data($this->socket);
+            if ($timeout['timed_out']) {
+                $this->keepAlive();
+            } else {
+                $this->end = $this->readPackage($msg);
+            }
         }
         return true; // Completed
+    }
+
+    /**
+    * Reads what kind of package it is.
+    *
+    * @author steffalon (https://github.com/steffalon)
+    * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
+    * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
+    *
+    * @param string $msg   message received from BE with unreadable header.
+    *
+    * @throws \Exception by invalid BERCon login details.
+    *
+    * @return integer
+    */
+    private function readPackage($msg)
+    {
+        $responseCode = unpack('H*', $msg); // Make message usefull for battleye packet by unpacking it to hexbyte.
+        $responseCode = str_split(substr($responseCode[1], 12), 2); // Get important hexbytes.
+        switch ($responseCode[1]) { // See https://www.battleye.com/downloads/BERConProtocol.txt for packet info.
+            case "00": // Login WILL ONLY HAPPEN IF socketLoopClose() got called and is done.
+                if ($responseCode[2] == "01") { // Login successful.
+                    if ($this->options['debug']) {
+                        echo "Accepted BERCon login.".PHP_EOL;
+                    }
+                    $this->authorize();
+                } else { // Otherwise $responseCode[2] == "0x00" (Login failed)
+                    throw new \Exception('Invalid BERCon login details. This process is getting stopped!');
+                }
+                break;
+            case "01": // Send commands by this client.
+                if (count($responseCode) == 3) {
+                    break;
+                }
+                if ($responseCode[3] !== "00") { // This package is small.
+                    if ($this->options['debug']) {
+                        echo "This is a small package.".PHP_EOL;
+                    }
+                } else {
+                    if ($this->options['debug']) { //This package is multi-packet.
+                        echo "Multi-packet.".PHP_EOL;
+                    }
+                    // if ($this->options['debug']) var_dump($responseCode); //Useful developer information.
+                    //      if ($responseCode[5] == "00") {
+                    //      $getAmount = $responseCode[4];
+                    //      if ($this->options['debug']) var_dump($getAmount);
+                    // }
+                }
+                break;
+            case "02": // Acknowledge as client.
+                return $this->acknowledge($this->end);
+                break;
+        }
     }
 
     /**
@@ -738,15 +791,14 @@ class ARC
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
     *
     * @param integer $int   Sequence number. Makes a new header with that number.
-    * @param boolean $debug Useful boolean for debugging. By defult, (false).
     *
     * @throws \Exception if failed to send a command
     *
     * @return integer
     */
-    private function acknowledge($int, $debug = false)
+    private function acknowledge($int)
     {
-        if ($debug) {
+        if ($this->options['debug']) {
             echo "Acknowledge!".PHP_EOL;
         }
         $needBuffer = chr(hexdec('ff')).chr(hexdec('02')).chr(hexdec(sprintf('%2X', $int)));
@@ -768,15 +820,13 @@ class ARC
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
     *
-    * @param boolean $debug Useful boolean for debugging. By defult, (false).
-    *
     * @throws \Exception if failed to send a command
     *
     * @return boolean
     */
-    private function keepAlive($debug = false)
+    private function keepAlive()
     {
-        if ($debug) {
+        if ($this->options['debug']) {
             echo '--Keep connection alive--'.PHP_EOL;
         }
         $keepalive = "BE".chr(hexdec("be")).chr(hexdec("dc")).chr(hexdec("c2")).chr(hexdec("58"));
