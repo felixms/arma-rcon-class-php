@@ -673,7 +673,7 @@ class ARC
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
     *
-    * @param integer $loop      Number of loops through this funtion. By default, (-1) for no ending.
+    * @param integer $loop  Number of loops through this funtion. By default, (-1) for no ending.
     *
     * @return boolean
     */
@@ -706,7 +706,7 @@ class ARC
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
     *
-    * @param integer $loop      Number of loops through this funtion. By default, (-1) for no ending.
+    * @param integer $loop  Number of loops through this funtion. By default, (-1) for no ending.
     *
     * @return boolean
     */
