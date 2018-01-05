@@ -731,7 +731,7 @@ class ARC
     }
 
     /**
-    * Reads what kind of package it is.
+    * Reads what kind of package it is. This method is also a helper for sequence.
     *
     * @author steffalon (https://github.com/steffalon)
     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
@@ -745,8 +745,8 @@ class ARC
     */
     private function readPackage($msg)
     {
-        $responseCode = unpack('H*', $msg); // Make message usefull for battleye packet by unpacking it to hexbyte.
-        $responseCode = str_split(substr($responseCode[1], 12), 2); // Get important hexbytes.
+        $responseCode = unpack('H*', $msg); // Make message usefull for battleye packet by unpacking it to hexadecimals.
+        $responseCode = str_split(substr($responseCode[1], 12), 2); // Get important hexadecimals.
         switch ($responseCode[1]) { // See https://www.battleye.com/downloads/BERConProtocol.txt for packet info.
             case "00": // Login WILL ONLY HAPPEN IF socketLoopClose() got called and is done.
                 if ($responseCode[2] == "01") { // Login successful.
@@ -767,7 +767,7 @@ class ARC
                         echo "This is a small package.".PHP_EOL;
                     }
                 } else {
-                    if ($this->options['debug']) { //This package is multi-packet.
+                    if ($this->options['debug']) { // This package is multi-packet.
                         echo "Multi-packet.".PHP_EOL;
                     }
                     // if ($this->options['debug']) var_dump($responseCode); //Useful developer information.
@@ -781,6 +781,24 @@ class ARC
                 return $this->acknowledge($this->end);
                 break;
         }
+    }
+
+    /**
+    * Read package format and return converted to usable bytes. Array starts at 0x[FF].
+    *
+    * @author steffalon (https://github.com/steffalon)
+    *
+    * @param string $msg    message received from BE with unreadable header. Do not modify or strip the original header and use this function.
+    *
+    * @throws \Exception by invalid BERCon login details.
+    *
+    * @return array
+    */
+    public function readPackageRaw($msg)
+    {
+        $responseCode = unpack('H*', $msg); // Make message usefull for battleye packet by unpacking it to bytes.
+        $responseCode = str_split(substr($responseCode[1], 12), 2); // Get important bytes.
+        return $responseCode;
     }
 
     /**
