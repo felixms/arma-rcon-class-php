@@ -745,8 +745,8 @@ class ARC
     */
     private function readPackage($msg)
     {
-        $responseCode = unpack('H*', $msg); // Make message usefull for battleye packet by unpacking it to hexadecimals.
-        $responseCode = str_split(substr($responseCode[1], 12), 2); // Get important hexadecimals.
+        $responseCode = unpack('H*', $msg); // Make message usefull for battleye packet by unpacking it to bytes.
+        $responseCode = str_split(substr($responseCode[1], 12), 2); // Get important bytes.
         switch ($responseCode[1]) { // See https://www.battleye.com/downloads/BERConProtocol.txt for packet info.
             case "00": // Login WILL ONLY HAPPEN IF socketLoopClose() got called and is done.
                 if ($responseCode[2] == "01") { // Login successful.
