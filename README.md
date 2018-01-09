@@ -102,6 +102,9 @@ ARC features many functions to send BattlEye commands easier. After creating a n
 * `disconnect()`: Closes the current connection.
 * `object reconnect()`: Closes the current connection & creates a new one.
 * `resource getSocket()`: Get the socket, which is used by ARC to send commands to the server.
+* `boolean socketLoop(int $loop)`: Get constant socket stream and don't disconnect after looping. $loop = numbers of socket data until exiting the method. $closeCon allows you to disconnect or not when done looping in this method. Note that the sequence will be reset. It is not required to fill parameter "$loop" by calling this method. Default setting: getSocketStream(-1) = infinite loop.
+* `boolean socketLoopClose(int $loop)`: Similar as socketLoop but disconnect after looping. It is not required to fill parameter "$loop" by calling this method. Default setting: getSocketStream(-1) = infinite loop.
+* `array readPackageRaw(string $msg)`: Make BettlEye format package readable for your program. Use $msg with unreadable header and unmodified string. Array will start as [0] => "FF" when having correct header. Array value [1] has important information what kind of care it needs for your connection. For more information, click [here](https://www.battleye.com/downloads/BERConProtocol.txt "BattlEye RCon Protocol Specification").
 
 *See [here](https://community.bistudio.com/wiki/BattlEye#RCon_commands "BattlEye Wiki") for more information about BattlEye commands*
 <br>
