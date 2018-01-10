@@ -66,6 +66,7 @@ try {
 Options can be passed to ARC as an array via the fourth parameter of the constructor. The following options are currently available:
 * `int timeoutSec = 1`: Sets a timeout value on the connection.
 * `bool autosavebans = false`: Automatically saves bans.txt after a player is banned or unbanned.
+* `bool debug = false` : turns on debug mod, only works on socketLoop, socketLoopClose
 
 *Suggestions for new options are always welcome!* :+1: <br>
 
