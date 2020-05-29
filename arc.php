@@ -207,20 +207,15 @@ class ARC
      */
     protected function getResponse()
     {
-        $get = function() {
-            return substr(fread($this->socket, 102400), strlen($this->head));
-        };
-        
-        $output = '';
-        do {
-            $answer = $get();
-            while (strpos($answer, 'RCon admin') !== false) {
-                $answer = $get();
-            }
-
-            $output .= $answer;
-        } while (!empty($answer));
-
+		$output = '';
+		
+		$temp = fread($this->socket, 102400);
+		while ($temp)
+		{
+			$output .= $this->splitPacket($temp);
+			$temp = fread($this->socket, 102400);
+		}
+		
         return $output;
     }
 
@@ -269,7 +264,7 @@ class ARC
      */
     private function getAuthCRC()
     {
-        $authCRC = sprintf('%x', crc32(chr(255).chr(00).trim($this->rconPassword)));
+        $authCRC = hash('crc32b', chr(255).chr(00).trim($this->rconPassword));
         $authCRC = array(substr($authCRC,-2,2), substr($authCRC,-4,2), substr($authCRC,-6,2), substr($authCRC,0,2));
 
         return $authCRC;
@@ -284,7 +279,7 @@ class ARC
      */
     private function getMsgCRC($command)
     {
-        $msgCRC = sprintf('%x', crc32(chr(255).chr(01).chr(hexdec(sprintf('%01b', 0))).$command));
+        $msgCRC = hash('crc32b', chr(255).chr(01).chr(hexdec(sprintf('%01b', 0))).$command);
         $msgCRC = array(substr($msgCRC,-2,2),substr($msgCRC,-4,2),substr($msgCRC,-6,2),substr($msgCRC,0,2));
 
         return $msgCRC;
@@ -898,4 +893,23 @@ class ARC
     {
         return preg_replace('/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/', '', $str);
     }
+	
+	public function splitPacket( $data )
+	{
+		$responseCode = $this->readPackageRaw($data);
+		
+		if ($responseCode[1] == "01")
+		{
+			if ($responseCode[3] !== "00") 
+			{
+				return substr($data, 9);
+			}
+			else
+			{
+				return substr($data, 12);
+			}
+		}
+		
+		return '';
+	}
 }
