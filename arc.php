@@ -195,7 +195,7 @@ class ARC
         }
 
         $result = fread($this->socket, 16);
-        if (@ord($result[strlen($result) - 1]) == 0) {
+        if (@ord($result[strlen($result)-1]) == 0) {
             throw new \Exception('Login failed, wrong password or wrong port!');
         }
     }
@@ -207,14 +207,15 @@ class ARC
      */
     protected function getResponse()
     {
-        $output = '';
-
-        $temp = fread($this->socket, 102400);
-        while ($temp) {
-            $output .= $this->splitPacket($temp);
-            $temp = fread($this->socket, 102400);
-        }
-
+		$output = '';
+		
+		$temp = fread($this->socket, 102400);
+		while ($temp)
+		{
+			$output .= $this->splitPacket($temp);
+			$temp = fread($this->socket, 102400);
+		}
+		
         return $output;
     }
 
@@ -234,9 +235,9 @@ class ARC
             throw new \Exception('Failed to send command, because the connection is closed!');
         }
         $msgCRC = $this->getMsgCRC($command);
-        $head = 'BE' . chr(hexdec($msgCRC[0])) . chr(hexdec($msgCRC[1])) . chr(hexdec($msgCRC[2])) . chr(hexdec($msgCRC[3])) . chr(hexdec('ff')) . chr(hexdec('01')) . chr(hexdec(sprintf('%01b', 0)));
+        $head = 'BE'.chr(hexdec($msgCRC[0])).chr(hexdec($msgCRC[1])).chr(hexdec($msgCRC[2])).chr(hexdec($msgCRC[3])).chr(hexdec('ff')).chr(hexdec('01')).chr(hexdec(sprintf('%01b', 0)));
 
-        $msg = $head . $command;
+        $msg = $head.$command;
         $this->head = $head;
 
         if ($this->writeToSocket($msg) === false) {
@@ -263,8 +264,8 @@ class ARC
      */
     private function getAuthCRC()
     {
-        $authCRC = hash('crc32b', chr(255) . chr(00) . trim($this->rconPassword));
-        $authCRC = array(substr($authCRC, -2, 2), substr($authCRC, -4, 2), substr($authCRC, -6, 2), substr($authCRC, 0, 2));
+        $authCRC = hash('crc32b', chr(255).chr(00).trim($this->rconPassword));
+        $authCRC = array(substr($authCRC,-2,2), substr($authCRC,-4,2), substr($authCRC,-6,2), substr($authCRC,0,2));
 
         return $authCRC;
     }
@@ -278,8 +279,8 @@ class ARC
      */
     private function getMsgCRC($command)
     {
-        $msgCRC = hash('crc32b', chr(255) . chr(01) . chr(hexdec(sprintf('%01b', 0))) . $command);
-        $msgCRC = array(substr($msgCRC, -2, 2), substr($msgCRC, -4, 2), substr($msgCRC, -6, 2), substr($msgCRC, 0, 2));
+        $msgCRC = hash('crc32b', chr(255).chr(01).chr(hexdec(sprintf('%01b', 0))).$command);
+        $msgCRC = array(substr($msgCRC,-2,2),substr($msgCRC,-4,2),substr($msgCRC,-6,2),substr($msgCRC,0,2));
 
         return $msgCRC;
     }
@@ -293,8 +294,8 @@ class ARC
     {
         $authCRC = $this->getAuthCRC();
 
-        $loginMsg = 'BE' . chr(hexdec($authCRC[0])) . chr(hexdec($authCRC[1])) . chr(hexdec($authCRC[2])) . chr(hexdec($authCRC[3]));
-        $loginMsg .= chr(hexdec('ff')) . chr(hexdec('00')) . $this->rconPassword;
+        $loginMsg = 'BE'.chr(hexdec($authCRC[0])).chr(hexdec($authCRC[1])).chr(hexdec($authCRC[2])).chr(hexdec($authCRC[3]));
+        $loginMsg .= chr(hexdec('ff')).chr(hexdec('00')).$this->rconPassword;
 
         return $loginMsg;
     }
@@ -486,7 +487,7 @@ class ARC
     {
         $this->send('players');
         $result = $this->getResponse();
-
+        
         $this->reconnect();
         return $result;
     }
@@ -507,7 +508,7 @@ class ARC
 
         $players = $this->cleanList($playersRaw);
         preg_match_all("#(\d+)\s+(\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+\b)\s+\-*(\d+)\s+([0-9a-fA-F]+)\(\w+\)\s([\S ]+)$#im", $players, $str);
-
+        
         return $this->formatList($str);
     }
 
@@ -550,7 +551,7 @@ class ARC
 
         $this->send("ban $player $time $reason");
         $this->reconnect();
-
+        
         if ($this->options['autosaveBans']) {
             $this->writeBans();
         }
@@ -576,11 +577,11 @@ class ARC
         }
 
         $this->send("addBan $player $time $reason");
-
+        
         if ($this->options['autosaveBans']) {
             $this->writeBans();
         }
-
+        
         return $this;
     }
 
@@ -602,11 +603,11 @@ class ARC
         }
 
         $this->send("removeBan $banId");
-
+       
         if ($this->options['autosaveBans']) {
             $this->writeBans();
         }
-
+        
         return $this;
     }
 
@@ -661,16 +662,16 @@ class ARC
     }
 
     /**
-     * Get socket and continue streaming and disconnect after looping.
-     *
-     * @author steffalon (https://github.com/steffalon)
-     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
-     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
-     *
-     * @param integer $loop  Number of loops through this funtion. By default, (-1) for no ending.
-     *
-     * @return boolean
-     */
+    * Get socket and continue streaming and disconnect after looping.
+    *
+    * @author steffalon (https://github.com/steffalon)
+    * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
+    * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
+    *
+    * @param integer $loop  Number of loops through this funtion. By default, (-1) for no ending.
+    *
+    * @return boolean
+    */
     public function socketLoopClose($loop = -1)
     {
         if ($this->end !== null) {
@@ -679,7 +680,7 @@ class ARC
         while ($this->end !== $loop) {
             $msg = fread($this->socket, 9000);
             if ($this->options['debug']) {
-                echo preg_replace("/\r|\n/", "", substr($msg, 9)) . PHP_EOL;
+                echo preg_replace("/\r|\n/", "", substr($msg, 9)).PHP_EOL;
             }
             $timeout = stream_get_meta_data($this->socket);
             if ($timeout['timed_out']) {
@@ -694,16 +695,16 @@ class ARC
     }
 
     /**
-     * Get socket and continue streaming and don't disconnect after looping.
-     *
-     * @author steffalon (https://github.com/steffalon)
-     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
-     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
-     *
-     * @param integer $loop  Number of loops through this funtion. By default, (-1) for no ending.
-     *
-     * @return boolean
-     */
+    * Get socket and continue streaming and don't disconnect after looping.
+    *
+    * @author steffalon (https://github.com/steffalon)
+    * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
+    * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
+    *
+    * @param integer $loop  Number of loops through this funtion. By default, (-1) for no ending.
+    *
+    * @return boolean
+    */
     public function socketLoop($loop = -1)
     {
         if ($this->end !== null) {
@@ -712,7 +713,7 @@ class ARC
         while ($this->end !== $loop) {
             $msg = fread($this->socket, 9000);
             if ($this->options['debug']) {
-                echo preg_replace("/\r|\n/", "", substr($msg, 9)) . PHP_EOL;
+                echo preg_replace("/\r|\n/", "", substr($msg, 9)).PHP_EOL;
             }
             $timeout = stream_get_meta_data($this->socket);
             if ($timeout['timed_out']) {
@@ -725,18 +726,18 @@ class ARC
     }
 
     /**
-     * Reads what kind of package it is. This method is also a helper for sequence.
-     *
-     * @author steffalon (https://github.com/steffalon)
-     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
-     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
-     *
-     * @param string $msg   message received from BE with unreadable header.
-     *
-     * @throws \Exception by invalid BERCon login details.
-     *
-     * @return integer
-     */
+    * Reads what kind of package it is. This method is also a helper for sequence.
+    *
+    * @author steffalon (https://github.com/steffalon)
+    * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
+    * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
+    *
+    * @param string $msg   message received from BE with unreadable header.
+    *
+    * @throws \Exception by invalid BERCon login details.
+    *
+    * @return integer
+    */
     private function readPackage($msg)
     {
         $responseCode = unpack('H*', $msg); // Make message usefull for battleye packet by unpacking it to bytes.
@@ -745,7 +746,7 @@ class ARC
             case "00": // Login WILL ONLY HAPPEN IF socketLoopClose() got called and is done.
                 if ($responseCode[2] == "01") { // Login successful.
                     if ($this->options['debug']) {
-                        echo "Accepted BERCon login." . PHP_EOL;
+                        echo "Accepted BERCon login.".PHP_EOL;
                     }
                     $this->authorize();
                 } else { // Otherwise $responseCode[2] == "0x00" (Login failed)
@@ -758,11 +759,11 @@ class ARC
                 }
                 if ($responseCode[3] !== "00") { // This package is small.
                     if ($this->options['debug']) {
-                        echo "This is a small package." . PHP_EOL;
+                        echo "This is a small package.".PHP_EOL;
                     }
                 } else {
                     if ($this->options['debug']) { // This package is multi-packet.
-                        echo "Multi-packet." . PHP_EOL;
+                        echo "Multi-packet.".PHP_EOL;
                     }
                     // if ($this->options['debug']) var_dump($responseCode); //Useful developer information.
                     //      if ($responseCode[5] == "00") {
@@ -778,16 +779,16 @@ class ARC
     }
 
     /**
-     * Read package format and return converted to usable bytes. Array starts at 0x[FF].
-     *
-     * @author steffalon (https://github.com/steffalon)
-     *
-     * @param string $msg    message received from BE with unreadable header. Do not modify or strip the original header and use this function.
-     *
-     * @throws \Exception by invalid BERCon login details.
-     *
-     * @return array
-     */
+    * Read package format and return converted to usable bytes. Array starts at 0x[FF].
+    *
+    * @author steffalon (https://github.com/steffalon)
+    *
+    * @param string $msg    message received from BE with unreadable header. Do not modify or strip the original header and use this function.
+    *
+    * @throws \Exception by invalid BERCon login details.
+    *
+    * @return array
+    */
     public function readPackageRaw($msg)
     {
         $responseCode = unpack('H*', $msg); // Make message usefull for battleye packet by unpacking it to bytes.
@@ -796,29 +797,29 @@ class ARC
     }
 
     /**
-     * Acknowledge the data and add +1 to sequence.
-     *
-     * @author steffalon (https://github.com/steffalon)
-     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
-     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
-     *
-     * @param integer $int   Sequence number. Makes a new header with that number.
-     *
-     * @throws \Exception if failed to send a command
-     *
-     * @return integer
-     */
+    * Acknowledge the data and add +1 to sequence.
+    *
+    * @author steffalon (https://github.com/steffalon)
+    * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
+    * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
+    *
+    * @param integer $int   Sequence number. Makes a new header with that number.
+    *
+    * @throws \Exception if failed to send a command
+    *
+    * @return integer
+    */
     private function acknowledge($int)
     {
         if ($this->options['debug']) {
-            echo "Acknowledge!" . PHP_EOL;
+            echo "Acknowledge!".PHP_EOL;
         }
-        $needBuffer = chr(hexdec('ff')) . chr(hexdec('02')) . chr(hexdec(sprintf('%2X', $int)));
+        $needBuffer = chr(hexdec('ff')).chr(hexdec('02')).chr(hexdec(sprintf('%2X', $int)));
         $needBuffer = hash("crc32b", $needBuffer);
         $needBuffer = str_split($needBuffer, 2);
         $needBuffer = array_reverse($needBuffer);
-        $statusmsg = "BE" . chr(hexdec($needBuffer[0])) . chr(hexdec($needBuffer[1])) . chr(hexdec($needBuffer[2])) . chr(hexdec($needBuffer[3]));
-        $statusmsg .= chr(hexdec('ff')) . chr(hexdec('02')) . chr(hexdec(sprintf('%2X', $int)));
+        $statusmsg = "BE".chr(hexdec($needBuffer[0])).chr(hexdec($needBuffer[1])).chr(hexdec($needBuffer[2])).chr(hexdec($needBuffer[3]));
+        $statusmsg .= chr(hexdec('ff')).chr(hexdec('02')).chr(hexdec(sprintf('%2X', $int)));
         if ($this->writeToSocket($statusmsg) === false) {
             throw new \Exception('Failed to send command!');
         }
@@ -826,23 +827,23 @@ class ARC
     }
 
     /**
-     * Keep the stream alive. Send package to BE server. Use this function before 45 seconds.
-     *
-     * @author steffalon (https://github.com/steffalon)
-     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
-     * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
-     *
-     * @throws \Exception if failed to send a command
-     *
-     * @return boolean
-     */
+    * Keep the stream alive. Send package to BE server. Use this function before 45 seconds.
+    *
+    * @author steffalon (https://github.com/steffalon)
+    * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/30 issue part 1
+    * @link https://github.com/schaeferfelix/arma-rcon-class-php/issues/31 issue part 2
+    *
+    * @throws \Exception if failed to send a command
+    *
+    * @return boolean
+    */
     private function keepAlive()
     {
         if ($this->options['debug']) {
-            echo '--Keep connection alive--' . PHP_EOL;
+            echo '--Keep connection alive--'.PHP_EOL;
         }
-        $keepalive = "BE" . chr(hexdec("be")) . chr(hexdec("dc")) . chr(hexdec("c2")) . chr(hexdec("58"));
-        $keepalive .= chr(hexdec('ff')) . chr(hexdec('01')) . chr(hexdec(sprintf('00')));
+        $keepalive = "BE".chr(hexdec("be")).chr(hexdec("dc")).chr(hexdec("c2")).chr(hexdec("58"));
+        $keepalive .= chr(hexdec('ff')).chr(hexdec('01')).chr(hexdec(sprintf('00')));
         if ($this->writeToSocket($keepalive) === false) {
             throw new \Exception('Failed to send command!');
             return false; // Failed
@@ -868,9 +869,9 @@ class ARC
         $result = array();
 
         // Loop true the main arrays, each holding a value
-        foreach ($str as $key => $value) {
+        foreach($str as $key => $value) {
             // Combines each main value into new array
-            foreach ($value as $keyLine => $line) {
+            foreach($value as $keyLine => $line) {
                 $result[$keyLine][$key] = trim($line);
             }
         }
@@ -892,11 +893,11 @@ class ARC
     {
         return preg_replace('/[\x00-\x09\x0B\x0C\x0E-\x1F\x7F]/', '', $str);
     }
-
-    public function splitPacket($data)
-    {
-        $responseCode = $this->readPackageRaw($data);
-
+	
+	public function splitPacket( $data )
+	{
+		$responseCode = $this->readPackageRaw($data);
+		
         if ($responseCode[1] == "01") {
 
             if (sizeof($responseCode) < 4) {
@@ -908,7 +909,7 @@ class ARC
                 return substr($data, 12);
             }
         }
-
-        return '';
-    }
+		
+		return '';
+	}
 }
