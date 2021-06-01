@@ -898,17 +898,17 @@ class ARC
 	{
 		$responseCode = $this->readPackageRaw($data);
 		
-		if ($responseCode[1] == "01")
-		{
-			if ($responseCode[3] !== "00") 
-			{
-				return substr($data, 9);
-			}
-			else
-			{
-				return substr($data, 12);
-			}
-		}
+        if ($responseCode[1] == "01") {
+
+            if (sizeof($responseCode) < 4) {
+                return "true";
+            }
+            if (sizeof($responseCode) >= 4 && $responseCode[3] !== "00") {
+                return substr($data, 9);
+            } else {
+                return substr($data, 12);
+            }
+        }
 		
 		return '';
 	}
